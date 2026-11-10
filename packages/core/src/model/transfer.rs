@@ -258,6 +258,11 @@ mod tests {
     fn formats_nanosecond_timestamp() {
         let time = SystemTime::UNIX_EPOCH + Duration::from_nanos(123_456_789);
         let formatted = format_timestamp(time).unwrap();
+        // Windows represents SystemTime as a FILETIME with 100 ns resolution, so
+        // the fractional part is truncated to 7 digits there. Unix keeps all 9.
+        #[cfg(windows)]
+        assert_eq!(formatted, "1970-01-01T00:00:00.1234567Z");
+        #[cfg(not(windows))]
         assert_eq!(formatted, "1970-01-01T00:00:00.123456789Z");
         assert_eq!(parse_timestamp(&formatted), Some(time));
     }
