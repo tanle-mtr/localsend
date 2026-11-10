@@ -9,12 +9,16 @@ class CustomProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: LinearProgressIndicator(
-        value: progress,
-        color: color ?? Theme.of(context).colorScheme.primary,
-        minHeight: 10,
+    // Progress changes several times a second; keep the repaint isolated so
+    // the surrounding list tile does not repaint with it.
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: LinearProgressIndicator(
+          value: progress,
+          color: color ?? Theme.of(context).colorScheme.primary,
+          minHeight: 10,
+        ),
       ),
     );
   }

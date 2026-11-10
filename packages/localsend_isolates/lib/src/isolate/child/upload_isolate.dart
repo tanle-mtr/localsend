@@ -14,7 +14,12 @@ import 'package:refena_flutter/refena_flutter.dart';
 import 'package:typed_isolates/typed_isolates.dart';
 
 /// How many files of a [HttpUploadFilesTask] are uploaded in parallel.
-const _concurrency = 2;
+///
+/// The Rust server allows up to 64 connections in total / 8 per peer, and the
+/// client reuses one reqwest client for the whole task. Two streams cannot
+/// saturate a gigabit LAN, especially with many small files; four keeps the
+/// pipeline full without putting too much memory pressure on mobile devices.
+const _concurrency = 4;
 
 /// How often a single file is uploaded at most when the receiver keeps
 /// rejecting it with a checksum mismatch (HTTP 422).

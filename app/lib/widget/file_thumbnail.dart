@@ -142,6 +142,9 @@ class MemoryThumbnail extends StatelessWidget {
         padding: fileType == FileType.apk ? const EdgeInsets.all(50) : EdgeInsets.zero,
         child: Image.memory(
           bytes!,
+          // Clipboard / share images can be multi-megapixel. Decode at the
+          // displayed size instead of materialising a full-resolution bitmap.
+          cacheWidth: 64,
           errorBuilder: (_, _, _) => Padding(
             padding: const EdgeInsets.all(10),
             child: Icon(fileType.icon, size: 32),

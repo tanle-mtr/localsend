@@ -1,5 +1,6 @@
+import 'dart:math' show pi;
+
 import 'package:flutter/material.dart';
-import 'package:localsend_isolates/util/sleep.dart';
 
 class RotatingWidget extends StatefulWidget {
   final Duration duration;
@@ -19,50 +20,56 @@ class RotatingWidget extends StatefulWidget {
   State<RotatingWidget> createState() => RotatingWidgetState();
 }
 
-class RotatingWidgetState extends State<RotatingWidget> {
-  static const _fps = 30;
-  static const _tickDuration = 1000 ~/ _fps; // in milliseconds
-  static const _maxRadians = 6.28; // 360 degrees in radians
-  double _angle = 0; // in radians
-  double _anglePerTick = 0;
+class RotatingWidgetState extends State<RotatingWidget> with SingleTickerProviderStateMixin {
+  static const _maxRadians = 2 * pi;
+  late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateAnglePerTick();
-      _loop();
-    });
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+    _syncSpinning();
   }
 
-  void _updateAnglePerTick() {
-    _anglePerTick = _maxRadians / (widget.duration.inMilliseconds / _tickDuration);
-    if (widget.reverse) {
-      _anglePerTick = -_anglePerTick;
+  @override
+  void didUpdateWidget(covariant RotatingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.duration != widget.duration) {
+      _controller.duration = widget.duration;
+    }
+    if (oldWidget.spinning != widget.spinning) {
+      _syncSpinning();
     }
   }
 
-  /// This loop has a much greater performance than using [AnimationController].
-  void _loop() async {
-    while (true) {
-      await sleepAsync(_tickDuration);
-      if (!mounted) {
-        return;
-      }
-      if (!widget.spinning) {
-        continue;
-      }
-      setState(() {
-        _angle = (_angle + _anglePerTick) % _maxRadians;
-      });
+  void _syncSpinning() {
+    if (widget.spinning) {
+      _controller.repeat();
+    } else {
+      // Fully stop the ticker; the old loop kept waking up 30 times a second
+      // even when nothing was spinning.
+      _controller.stop();
     }
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: _angle,
-      child: widget.child,
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        // Passed as `child` so the subtree is built once, not on every frame.
+        child: widget.child,
+        builder: (context, child) {
+          final angle = (widget.reverse ? -1 : 1) * _controller.value * _maxRadians;
+          return Transform.rotate(angle: angle, child: child);
+        },
+      ),
     );
   }
 }
