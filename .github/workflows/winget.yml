@@ -11,6 +11,9 @@ on:
 
 jobs:
   publish:
+    # The upstream workflow pushes to the official LocalSend.LocalSend WinGet
+    # package and needs WINGET_TOKEN. Forks must never run it on their releases.
+    if: github.repository == 'localsend/localsend'
     runs-on: ubuntu-latest
     steps:
       - name: Publish LocalSend
