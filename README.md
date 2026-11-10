@@ -40,6 +40,8 @@ LocalSend is a free, open-source app that allows you to securely share files and
   - [macOS](#macos)
   - [Windows](#windows)
   - [Linux](#linux)
+- [Support this fork](#support-this-fork)
+- [License](#license)
 
 ## About
 
@@ -331,3 +333,33 @@ Instructions in [localsend/snap/README.md](https://github.com/localsend/snap/blo
 <a href="https://github.com/localsend/localsend/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=localsend/localsend"  alt="Localsend Contributors"/>
 </a>
+
+## Support this fork
+
+This fork is maintained in personal spare time. If the extra fixes and the
+prebuilt packages are useful to you, you can buy the maintainer a coffee via
+WeChat Pay. This is a **personal** donation channel and is not affiliated with,
+or endorsed by, the upstream LocalSend project.
+
+<img src="/docs/sponsor/wechat-pay.png" alt="WeChat Pay donation QR code" width="260" />
+
+> Donations are entirely voluntary. They do not include any warranty, priority
+> support, or commercial licence.
+
+## License
+
+LocalSend is licensed under the **Apache License 2.0** — see [LICENSE](/LICENSE).
+This repository is a fork and stays under the same licence. The list of changes
+made here is recorded in [NOTICE](/NOTICE).
+
+- Upstream copyright © 2022-2026 Tien Do Nam and the LocalSend contributors.
+- The modifications in this fork are distributed under Apache-2.0 as well.
+- Third-party components keep their own licences (for example the vendored
+  `cargokit`, `flutter_bluetooth_serial` and `ffmpeg_kit_flutter_new_min`
+  under `packages/`).
+- The donation QR code and this documentation are **not** covered by the source
+  code licence.
+
+If you redistribute binaries built from this fork, keep the `LICENSE` and
+`NOTICE` files, state that files were modified, and do not imply endorsement by
+the upstream project (Apache-2.0, Section 4).

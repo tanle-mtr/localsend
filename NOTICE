@@ -1,0 +1,28 @@
+LocalSend - personal fork
+=========================
+
+Copyright 2022-2026 Tien Do Nam and the LocalSend contributors (upstream)
+Copyright 2026 tanle-mtr (modifications in this fork)
+
+This product is a derivative work of LocalSend
+(https://github.com/localsend/localsend), distributed under the
+Apache License, Version 2.0. The original LICENSE file is retained
+unchanged at the repository root.
+
+NOTICE: Files in this repository have been modified.
+
+Summary of modifications (non-exhaustive):
+  * Network discovery, share-intent handling and session lifecycle fixes.
+  * In-app network diagnostics card on the Troubleshoot page.
+  * UI, RTL and accessibility fixes.
+  * Vendored and patched Flutter plugins under packages/ (AGP 8 namespace,
+    replacement for the delisted ffmpeg_kit_flutter package).
+  * Build fixes for Windows, Android and Linux toolchains.
+  * Additional CI workflows producing unsigned macOS and iOS artifacts.
+
+This fork is not affiliated with, or endorsed by, the upstream LocalSend
+project. Prebuilt binaries may be self-signed or unsigned.
+
+Third-party components under packages/ and the Flutter/Dart dependencies
+retain their respective licenses. The donation QR code under docs/sponsor/
+is a personal payment code and is not part of the source code license.

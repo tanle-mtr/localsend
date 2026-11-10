@@ -41,6 +41,8 @@ LocalSend 是一个自由、开源的应用程序，允许你在本地网络上�
   - [macOS](#macos)
   - [Windows](#windows)
   - [Linux](#linux)
+- [支持本分支](#支持本分支)
+- [许可证](#许可证)
 
 ## 关于
 
@@ -303,3 +305,27 @@ appimage-builder --recipe AppImageBuilder.yml
 <a href="https://github.com/localsend/localsend/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=localsend/localsend"  alt="Localsend 贡献者"/>
 </a>
+
+## 支持本分支
+
+本分支由个人利用业余时间维护。如果这些额外修复和预编译安装包对你有帮助，
+可以通过微信扫码随意打赏。这是**个人**收款渠道，与上游 LocalSend 项目无关，
+也不代表其背书。
+
+<img src="/docs/sponsor/wechat-pay.png" alt="微信收款码" width="260" />
+
+> 打赏纯属自愿，不包含任何担保、优先支持或商业授权。
+
+## 许可证
+
+LocalSend 使用 **Apache License 2.0**，见 [LICENSE](/LICENSE)。
+本仓库是其 fork，沿用同一许可证；本分支的修改清单见 [NOTICE](/NOTICE)。
+
+- 上游版权 © 2022-2026 Tien Do Nam 及 LocalSend 贡献者。
+- 本 fork 的修改同样以 Apache-2.0 发布。
+- 第三方组件保留各自许可证（`packages/` 下的 `cargokit`、
+  `flutter_bluetooth_serial`、`ffmpeg_kit_flutter_new_min` 等）。
+- 打赏码与本文档不属于源代码许可证范围。
+
+再分发本 fork 构建的二进制时，请保留 `LICENSE` 与 `NOTICE`，标明文件已被修改，
+且不得暗示获得上游项目背书（Apache-2.0 第 4 条）。
