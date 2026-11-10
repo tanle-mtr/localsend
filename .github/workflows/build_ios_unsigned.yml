@@ -43,7 +43,8 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: '1.97.1'
-          targets: 'aarch64-apple-ios,aarch64-apple-ios-sim,x86_64-apple-ios-sim'
+          # Rust 1.97.1 已移除 x86_64-apple-ios-sim；macos-15 runner 是 arm64，只需下面两个。
+          targets: 'aarch64-apple-ios,aarch64-apple-ios-sim'
 
       - name: Remove upstream signing team
         run: |
