@@ -65,6 +65,11 @@ Supported by TestMu AI
 
 [![Packaging status](https://repology.org/badge/tiny-repos/localsend.svg)](https://repology.org/project/localsend/versions)
 
+> **Fork builds:** prebuilt packages for Windows, Android, Linux, macOS and iOS
+> from this fork are on the [Releases page](https://github.com/tanle-mtr/localsend/releases/latest).
+> These are self-signed / unsigned personal builds, not official releases — read
+> the release notes before installing.
+
 It is recommended to download the app either from an app store or from a package manager because the app does not have an auto-update.
 
 | Windows                 | macOS                   | Linux              | Android        | iOS           | Fire OS    |

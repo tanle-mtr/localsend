@@ -56,6 +56,10 @@ LocalSend 是一个跨平台应用程序，使用 REST API 和 HTTPS 加密实�
 
 [![Packaging status](https://repology.org/badge/tiny-repos/localsend.svg)](https://repology.org/project/localsend/versions)
 
+> **本分支构建包**：Windows、Android、Linux、macOS、iOS 的预编译安装包见
+> [Releases 页面](https://github.com/tanle-mtr/localsend/releases/latest)。
+> 均为自签名或未签名的个人构建，并非官方发布，安装前请先阅读发行说明。
+
 建议从应用商店或软件包管理器下载该应用，因为该应用没有自动更新功能。
 
 | Windows                  | macOS                   | Linux              | Android        | iOS           | Fire OS    |
