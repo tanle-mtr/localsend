@@ -12,7 +12,8 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-15
+    # connectivity_plus 7.x 需要 Xcode 26 SDK，macos-15 的 Xcode 16.4 会编译失败。
+    runs-on: macos-26
     timeout-minutes: 180
     env:
       FLUTTER_XCODE_CODE_SIGNING_ALLOWED: 'NO'
@@ -25,6 +26,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Show toolchain
+        run: |
+          sw_vers
+          uname -m
+          xcodebuild -version
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
