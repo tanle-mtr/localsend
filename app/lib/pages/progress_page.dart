@@ -392,12 +392,15 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
                               Row(
                                 children: [
                                   Flexible(
-                                    child: Text(
-                                      fileName,
-                                      style: const TextStyle(fontSize: 16, height: 1),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.fade,
-                                      softWrap: false,
+                                    child: Tooltip(
+                                      message: fileName,
+                                      child: Text(
+                                        fileName,
+                                        style: const TextStyle(fontSize: 16, height: 1),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.fade,
+                                        softWrap: false,
+                                      ),
                                     ),
                                   ),
                                   Text(' (${file.size.asReadableFileSize})', style: const TextStyle(fontSize: 16, height: 1)),

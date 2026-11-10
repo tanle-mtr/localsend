@@ -91,11 +91,14 @@ class SelectedFilesPage extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      message != null ? '"${message.replaceAll('\n', ' ')}"' : file.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.fade,
-                                      softWrap: false,
+                                    Tooltip(
+                                      message: message != null ? '"${message.replaceAll('\n', ' ')}"' : file.name,
+                                      child: Text(
+                                        message != null ? '"${message.replaceAll('\n', ' ')}"' : file.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.fade,
+                                        softWrap: false,
+                                      ),
                                     ),
                                     Text(file.size.asReadableFileSize, style: Theme.of(context).textTheme.bodySmall),
                                   ],

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:localsend_app/provider/animation_provider.dart';
+import 'package:localsend_app/provider/network/scan_facade.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/provider/window_dimensions_provider.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
@@ -32,6 +33,7 @@ class WindowWatcher extends StatefulWidget {
 class _WindowWatcherState extends State<WindowWatcher> with WindowListener, Refena {
   static WindowDimensionsController? _dimensionsController;
   static Stopwatch s = Stopwatch();
+  static DateTime _lastFocusScan = DateTime.fromMillisecondsSinceEpoch(0);
 
   WindowDimensionsController _ensureDimensionsProvider() => ref.watch(windowDimensionProvider);
 
@@ -113,6 +115,17 @@ class _WindowWatcherState extends State<WindowWatcher> with WindowListener, Refe
   void onWindowFocus() {
     // call set state according to window_manager README
     setState(() {});
+
+    // Refresh nearby devices when the user returns to the window (#1111).
+    // Debounced so opening/closing dialogs does not restart discovery.
+    if (checkPlatformIsDesktop()) {
+      final now = DateTime.now();
+      if (now.difference(_lastFocusScan) >= const Duration(seconds: 10)) {
+        _lastFocusScan = now;
+        // ignore: discarded_futures
+        ref.global.dispatchAsync(StartSmartScan());
+      }
+    }
   }
 
   @override

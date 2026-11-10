@@ -2,7 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localsend_app/gen/strings.g.dart';
+import 'package:localsend_app/provider/local_ip_provider.dart';
+import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
+import 'package:localsend_app/provider/network/server/server_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/util/native/cmd_helper.dart';
 import 'package:localsend_app/util/native/macos_channel.dart' as macos_channel;
@@ -10,6 +14,7 @@ import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/widget/custom_icon_button.dart';
 import 'package:localsend_app/widget/dialogs/not_available_on_platform_dialog.dart';
 import 'package:localsend_app/widget/responsive_list_view.dart';
+import 'package:localsend_isolates/isolate.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
 class TroubleshootPage extends StatelessWidget {
@@ -27,6 +32,8 @@ class TroubleshootPage extends StatelessWidget {
         children: [
           Text(t.troubleshootPage.subTitle, textAlign: TextAlign.center),
           const SizedBox(height: 5),
+          const _DiagnosticsCard(),
+          const SizedBox(height: 10),
           if (checkPlatformIsDesktop())
             _TroubleshootItem(
               symptomText: t.troubleshootPage.firewall.symptom,
@@ -226,4 +233,140 @@ class _NativeFixAction extends _FixAction {
   void runFix() async {
     await action();
   }
+}
+
+/// Shows live network state and one-tap recovery actions.
+/// This turns the "cannot discover / cannot connect" reports into
+/// self-service checks instead of support tickets.
+class _DiagnosticsCard extends StatelessWidget {
+  const _DiagnosticsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = context.ref;
+    final server = ref.watch(serverProvider);
+    final ips = ref.watch(localIpProvider).localIps;
+    final deviceCount = ref.watch(nearbyDevicesProvider.select((state) => state.devices.length));
+    final hasVirtualIp = ips.any(_isVirtualIp);
+    final summary = 'LocalSend diagnostics\n'
+        'server: ${server == null ? 'stopped' : 'running :${server.port}'}\n'
+        'ips: ${ips.join(', ')}\n'
+        'devices: $deviceCount\n'
+        'virtual_ip: $hasVirtualIp';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.troubleshootPage.diagnostics.title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 10),
+            _DiagnosticRow(
+              icon: Icons.dns,
+              text: server == null
+                  ? t.troubleshootPage.diagnostics.serverStopped
+                  : t.troubleshootPage.diagnostics.serverRunning(port: server.port),
+              color: server == null ? Colors.orange : Colors.green,
+            ),
+            if (ips.isNotEmpty)
+              _DiagnosticRow(
+                icon: Icons.lan,
+                text: t.troubleshootPage.diagnostics.localIps(ips: ips.join(', ')),
+              ),
+            _DiagnosticRow(
+              icon: Icons.devices,
+              text: t.troubleshootPage.diagnostics.discovered(n: deviceCount),
+            ),
+            if (hasVirtualIp)
+              _DiagnosticRow(
+                icon: Icons.vpn_key,
+                text: t.troubleshootPage.diagnostics.vpnWarning,
+                color: Colors.orange,
+              ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                TextButton.icon(
+                  onPressed: () async {
+                    try {
+                      await ref.notifier(serverProvider).restartServerFromSettings();
+                    } catch (_) {
+                      // The status row above reflects whether the restart worked.
+                    }
+                  },
+                  icon: const Icon(Icons.restart_alt),
+                  label: Text(t.troubleshootPage.diagnostics.restartServer),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    ref.redux(parentIsolateProvider).dispatch(IsolateDiscoveryRestartAction());
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: Text(t.troubleshootPage.diagnostics.restartDiscovery),
+                ),
+                TextButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: summary));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(t.troubleshootPage.diagnostics.copied)),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: Text(t.troubleshootPage.diagnostics.copy),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DiagnosticRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color? color;
+
+  const _DiagnosticRow({
+    required this.icon,
+    required this.text,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text, style: color == null ? null : TextStyle(color: color)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+bool _isVirtualIp(String ip) {
+  final parts = ip.split('.');
+  if (parts.length != 4) {
+    return false;
+  }
+  final a = int.tryParse(parts[0]);
+  final b = int.tryParse(parts[1]);
+  if (a == null || b == null) {
+    return false;
+  }
+  // Tailscale and some CGNAT networks use 100.64.0.0/10.
+  return a == 100 && b >= 64 && b <= 127;
 }

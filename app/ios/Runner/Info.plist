@@ -156,6 +156,16 @@
         <string>_lnp._tcp.</string>
     </array>
 
+    <!-- 实验功能：蓝牙无网互传（iOS 第三方 App 不支持文件传输，仅作占位声明） -->
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>LocalSend 使用蓝牙进行设备发现（iOS 上不支持蓝牙文件传输）。</string>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>LocalSend 使用蓝牙进行设备发现（iOS 上不支持蓝牙文件传输）。</string>
+
+    <!-- 实验功能：扫码互传（相机） -->
+    <key>NSCameraUsageDescription</key>
+    <string>LocalSend 需要使用相机扫描二维码，以实现无网互传。</string>
+
     <!-- share_handler -->
     <key>FlutterDeepLinkingEnabled</key>
     <false/>

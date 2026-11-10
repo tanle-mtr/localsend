@@ -54,6 +54,24 @@
     },
     "link": "Receive via link"
   },
+  "qrConnect": {
+    "receive": "Receive via QR",
+    "scan": "Scan QR to connect",
+    "invalid": "This is not a LocalSend connection QR code",
+    "notFound": "Could not reach the device. Make sure both phones are on the same Wi-Fi or hotspot.",
+    "needSameNetwork": "Both devices must be on the same Wi-Fi or hotspot",
+    "scanHint": "Point the camera at the other device's QR code",
+    "torch": "Torch",
+    "cameraError": "Camera unavailable. Please grant camera permission in system settings.",
+    "needNetwork": "No network connection. Connect to Wi-Fi or enable a hotspot first.",
+    "openHotspot": "Enable personal hotspot",
+    "hotspotHint": "For a network-less transfer, turn on your personal hotspot and have the other device join it.",
+    "hotspotName": "Your hotspot name (optional, helps the other side join)",
+    "openWifiSettings": "Open Wi-Fi settings",
+    "joinHotspot": "Retry after joining hotspot",
+    "hotspot": "Hotspot",
+    "iosHotspotHint": "iOS cannot open hotspot settings automatically. Please enable it in Settings › Personal Hotspot."
+  },
   "sendTab": {
     "title": "Send",
     "selection": {
@@ -159,13 +177,26 @@
       "privacyPolicy": "Privacy Policy",
       "termsOfUse": "Terms of Use"
     },
-    "advancedSettings": "Advanced settings"
+    "advancedSettings": "Advanced settings",
+    "experiments": "Experiments"
   },
   "troubleshootPage": {
     "title": "Troubleshoot",
     "subTitle": "Does the app not work as expected? Here you can find some common solutions to problems.",
     "solution": "Solution:",
     "fixButton": "Fix automatically",
+    "diagnostics": {
+      "title": "Network diagnostics",
+      "serverRunning": "Server running on port {port}",
+      "serverStopped": "Server is not running",
+      "localIps": "Local IPs: {ips}",
+      "discovered": "{n} device(s) discovered",
+      "vpnWarning": "VPN/virtual network address detected. A VPN can block device discovery.",
+      "restartServer": "Restart server",
+      "restartDiscovery": "Restart discovery",
+      "copy": "Copy diagnostics",
+      "copied": "Diagnostics copied"
+    },
     "firewall": {
       "symptom": "This device can send files to other devices but other devices cannot send files to this device.",
       "solution": "This is most likely a firewall issue. You can solve this by allowing incoming connections (UDP and TCP) on port {port}.",
@@ -206,7 +237,8 @@
     "apps": "{n} Apps"
   },
   "selectedFilesPage": {
-    "deleteAll": "Delete all"
+    "deleteAll": "Delete all",
+    "noFiles": "No files selected"
   },
   "deviceDetailsPage": {
     "title": "Device Details",
@@ -576,5 +608,31 @@
     "sActionUseCameraHint": "use camera",
     "sNameDurationLabel": "duration",
     "sUnitAssetCountLabel": "count"
+  },
+  "bluetoothTab": {
+    "title": "Bluetooth",
+    "unsupported": "Bluetooth file transfer is not supported on this platform (iOS).",
+    "enablePrompt": "Enable Bluetooth to start",
+    "discover": "Scan for devices",
+    "stopDiscover": "Stop scanning",
+    "noDevices": "No devices found",
+    "receiveMode": "Receive mode",
+    "receiveHint": "Turn on receive mode, then send from another device over Bluetooth (no network needed).",
+    "sending": "Sending...",
+    "received": "Received files",
+    "sendTo": "Send to",
+    "pairHint": "Pair the device in your system Bluetooth settings first.",
+    "notPaired": "Not paired",
+    "turnOn": "Turn on",
+    "bluetoothOff": "Bluetooth is off",
+    "deviceCount": "{count} device(s) found",
+    "receiving": "Receiving…"
+  },
+  "livePhoto": {
+    "autoConvert": "Auto-convert Live Photos across brands",
+    "autoConvertHint": "When sending a Live/Motion Photo to a different phone brand, convert it to the format the receiver's gallery understands.",
+    "converting": "Converting Live Photos...",
+    "notConvertedTitle": "Live Photo not converted",
+    "notConverted": "{count} Live Photo(s) could not be converted and will be sent as still images."
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:localsend_app/config/init.dart';
 import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
+import 'package:localsend_app/pages/bluetooth/bluetooth_page.dart';
 import 'package:localsend_app/pages/home_page_controller.dart';
 import 'package:localsend_app/pages/tabs/receive_tab.dart';
 import 'package:localsend_app/pages/tabs/send_tab.dart';
@@ -17,7 +18,8 @@ import 'package:refena_flutter/refena_flutter.dart';
 enum HomeTab {
   receive(Icons.wifi),
   send(Icons.send),
-  settings(Icons.settings);
+  settings(Icons.settings),
+  bluetooth(Icons.bluetooth);
 
   const HomeTab(this.icon);
 
@@ -31,6 +33,8 @@ enum HomeTab {
         return t.sendTab.title;
       case HomeTab.settings:
         return t.settingsTab.title;
+      case HomeTab.bluetooth:
+        return t.bluetoothTab.title;
     }
   }
 }
@@ -141,11 +145,12 @@ class _HomePageState extends State<HomePage> with Refena {
                         PageView(
                           controller: vm.controller,
                           physics: const NeverScrollableScrollPhysics(),
-                          children: const [
-                            ReceiveTab(),
-                            SendTab(),
-                            SettingsTab(),
-                          ],
+                        children: const [
+                          ReceiveTab(),
+                          SendTab(),
+                          SettingsTab(),
+                          BluetoothPage(),
+                        ],
                         ),
                         if (_dragAndDropIndicator)
                           Container(

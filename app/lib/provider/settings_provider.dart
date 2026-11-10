@@ -77,8 +77,10 @@ class SettingsService extends PureNotifier<SettingsState> {
     receiveViaLinkAutoAccept: _persistence.getReceiveViaLinkAutoAccept(),
     createChecksums: _persistence.getCreateChecksums(),
     verifyChecksums: _persistence.getVerifyChecksums(),
-    discoveryTimeout: _persistence.getDiscoveryTimeout(),
-    advancedSettings: _persistence.getAdvancedSettingsEnabled(),
+      discoveryTimeout: _persistence.getDiscoveryTimeout(),
+      advancedSettings: _persistence.getAdvancedSettingsEnabled(),
+      enableBluetooth: _persistence.getEnableBluetooth(),
+      autoConvertLivePhoto: _persistence.getAutoConvertLivePhoto(),
   );
 
   Future<void> setAlias(String alias) async {
@@ -309,6 +311,20 @@ class SettingsService extends PureNotifier<SettingsState> {
     await _persistence.setVerifyChecksums(verifyChecksums);
     state = state.copyWith(
       verifyChecksums: verifyChecksums,
+    );
+  }
+
+  Future<void> setEnableBluetooth(bool enableBluetooth) async {
+    await _persistence.setEnableBluetooth(enableBluetooth);
+    state = state.copyWith(
+      enableBluetooth: enableBluetooth,
+    );
+  }
+
+  Future<void> setAutoConvertLivePhoto(bool autoConvertLivePhoto) async {
+    await _persistence.setAutoConvertLivePhoto(autoConvertLivePhoto);
+    state = state.copyWith(
+      autoConvertLivePhoto: autoConvertLivePhoto,
     );
   }
 }

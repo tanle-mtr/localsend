@@ -54,6 +54,24 @@
     },
     "link": "通过链接接收"
   },
+  "qrConnect": {
+    "receive": "通过二维码接收",
+    "scan": "扫码连接",
+    "invalid": "这不是 LocalSend 的连接二维码",
+    "notFound": "无法连接对方设备，请确认两台设备处于同一 Wi‑Fi 或热点下。",
+    "needSameNetwork": "两台设备需处于同一 Wi‑Fi 或热点",
+    "scanHint": "将摄像头对准对方的二维码",
+    "torch": "手电筒",
+    "cameraError": "相机不可用，请在系统设置中授予相机权限。",
+    "needNetwork": "当前无网络连接，请先连接 Wi‑Fi 或开启热点。",
+    "openHotspot": "开启个人热点",
+    "hotspotHint": "如需完全离线互传，请开启个人热点并让对方连接该热点。",
+    "hotspotName": "你的热点名称（可选，便于对方加入）",
+    "openWifiSettings": "打开 Wi‑Fi 设置",
+    "joinHotspot": "加入热点后重试",
+    "hotspot": "热点",
+    "iosHotspotHint": "iOS 无法自动打开热点设置，请在「设置 › 个人热点」中手动开启。"
+  },
   "sendTab": {
     "title": "发送",
     "selection": {
@@ -157,7 +175,8 @@
       "privacyPolicy": "隐私政策",
       "termsOfUse": "使用条款"
     },
-    "advancedSettings": "高级设置"
+    "advancedSettings": "高级设置",
+    "experiments": "实验功能"
   },
   "troubleshootPage": {
     "title": "故障排除",
@@ -176,6 +195,18 @@
     "noConnection": {
       "symptom": "双方设备均无法发现对方或者分享文件。",
       "solution": "当问题发生在双方设备上时，请先确认双方设备处于同一个 Wi‑Fi 网络上，且共享相同的网络配置（端口、多播地址、加密选项）。若因 Wi‑Fi 不允许参与者间通信，那么请在路由器中关闭“接入点(AP)隔离”选项。"
+    },
+    "diagnostics": {
+      "title": "网络诊断",
+      "serverRunning": "服务运行中，端口 {port}",
+      "serverStopped": "服务未运行",
+      "localIps": "本机 IP：{ips}",
+      "discovered": "已发现 {n} 台设备",
+      "vpnWarning": "检测到 VPN/虚拟网卡地址，VPN 可能导致设备发现失败。",
+      "restartServer": "重启服务",
+      "restartDiscovery": "重启发现",
+      "copy": "复制诊断信息",
+      "copied": "诊断信息已复制"
     }
   },
   "networkInterfacesPage": {
@@ -204,7 +235,8 @@
     "apps": "{n} 个应用"
   },
   "selectedFilesPage": {
-    "deleteAll": "全部删除"
+    "deleteAll": "全部删除",
+    "noFiles": "未选择文件"
   },
   "deviceDetailsPage": {
     "title": "设备详情",
@@ -572,5 +604,31 @@
     "sActionUseCameraHint": "使用摄像头",
     "sNameDurationLabel": "时长",
     "sUnitAssetCountLabel": "计数"
+  },
+  "bluetoothTab": {
+    "title": "蓝牙",
+    "unsupported": "当前平台（iOS）不支持蓝牙文件传输。",
+    "enablePrompt": "开启蓝牙以开始",
+    "discover": "扫描设备",
+    "stopDiscover": "停止扫描",
+    "noDevices": "未找到设备",
+    "receiveMode": "接收模式",
+    "receiveHint": "开启接收模式后，从另一台设备通过蓝牙发送（无需网络）。",
+    "sending": "发送中…",
+    "received": "已接收文件",
+    "sendTo": "发送到",
+    "pairHint": "请先在系统蓝牙设置中与该设备配对。",
+    "notPaired": "未配对",
+    "turnOn": "开启",
+    "bluetoothOff": "蓝牙已关闭",
+    "deviceCount": "找到 {count} 台设备",
+    "receiving": "接收中…"
+  },
+  "livePhoto": {
+    "autoConvert": "跨品牌自动转换动态图",
+    "autoConvertHint": "当把实况/动态照片发送给不同品牌的手机时，自动转换为对方相册可识别的格式。",
+    "converting": "正在转换动态图…",
+    "notConvertedTitle": "动态照片未转换",
+    "notConverted": "{count} 张动态照片无法转换，将作为静态图片发送。"
   }
 }

@@ -296,14 +296,34 @@ class SettingsTab extends StatelessWidget {
                     },
                   ),
                   _BooleanEntry(
-                    label: t.settingsTab.send.createChecksums,
-                    value: vm.settings.createChecksums,
-                    onChanged: (b) async {
-                      await ref.notifier(settingsProvider).setCreateChecksums(b);
-                    },
-                  ),
-                ],
-              ),
+                  label: t.settingsTab.send.createChecksums,
+                  value: vm.settings.createChecksums,
+                  onChanged: (b) async {
+                    await ref.notifier(settingsProvider).setCreateChecksums(b);
+                  },
+                ),
+              ],
+            ),
+            _SettingsSection(
+              title: t.settingsTab.experiments,
+              children: [
+                _BooleanEntry(
+                  label: t.bluetoothTab.title,
+                  value: vm.settings.enableBluetooth,
+                  onChanged: (b) async {
+                    await ref.notifier(settingsProvider).setEnableBluetooth(b);
+                  },
+                ),
+                _BooleanEntry(
+                  label: t.livePhoto.autoConvert,
+                  description: t.livePhoto.autoConvertHint,
+                  value: vm.settings.autoConvertLivePhoto,
+                  onChanged: (b) async {
+                    await ref.notifier(settingsProvider).setAutoConvertLivePhoto(b);
+                  },
+                ),
+              ],
+            ),
             _SettingsSection(
               title: t.settingsTab.network.title,
               children: [
@@ -373,6 +393,8 @@ class SettingsTab extends StatelessWidget {
                       final alias = confirmedAlias.trim();
                       vm.aliasController.text = alias;
                       await ref.notifier(settingsProvider).setAlias(alias);
+                      // Apply immediately so the receive page and peers see the new name (#2426).
+                      ref.notifier(serverProvider).updateAlias(alias);
                     },
                     actions: [
                       Tooltip(

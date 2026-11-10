@@ -1,0 +1,78 @@
+name: Build iOS (unsigned)
+
+# 无 Apple Developer 账号时只能产出未签名的 .app / .ipa：
+# 可用于模拟器、越狱设备，或后续用自己的证书重签名（ios-deploy / AltStore / Sideloadly）。
+on:
+  workflow_dispatch:
+    inputs:
+      flutter_version:
+        description: 'Flutter version'
+        required: false
+        default: '3.47.9'
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+    timeout-minutes: 180
+    env:
+      FLUTTER_XCODE_CODE_SIGNING_ALLOWED: 'NO'
+      FLUTTER_XCODE_CODE_SIGNING_REQUIRED: 'NO'
+      FLUTTER_XCODE_CODE_SIGN_IDENTITY: '-'
+      FLUTTER_XCODE_CODE_SIGN_STYLE: 'Manual'
+      COCOAPODS_DISABLE_STATS: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ inputs.flutter_version }}
+          cache: true
+
+      - name: Prepare Flutter iOS
+        run: |
+          flutter config --no-analytics
+          flutter precache --ios
+          flutter --version
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.97.1'
+          targets: 'aarch64-apple-ios,aarch64-apple-ios-sim,x86_64-apple-ios-sim'
+
+      - name: Remove upstream signing team
+        run: |
+          sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/g' app/ios/Runner.xcodeproj/project.pbxproj
+          grep -c 'DEVELOPMENT_TEAM = ""' app/ios/Runner.xcodeproj/project.pbxproj || true
+
+      - name: Pub get
+        working-directory: app
+        run: flutter pub get
+
+      - name: Build iOS release (no codesign)
+        working-directory: app
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned IPA and archive
+        run: |
+          APP="app/build/ios/iphoneos/Runner.app"
+          test -d "$APP" || { echo "Runner.app not found"; find app/build/ios -maxdepth 5 -name '*.app' -print; exit 1; }
+          rm -rf /tmp/localsend_ipa && mkdir -p /tmp/localsend_ipa/Payload
+          cp -R "$APP" /tmp/localsend_ipa/Payload/
+          (cd /tmp/localsend_ipa && zip -qr "$GITHUB_WORKSPACE/LocalSend-1.18.2-ios-unsigned.ipa" Payload)
+          tar czf "LocalSend-1.18.2-ios-app.tar.gz" -C "$(dirname "$APP")" "Runner.app"
+          ls -lh LocalSend-1.18.2-ios-*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: localsend-ios-unsigned
+          path: |
+            LocalSend-1.18.2-ios-unsigned.ipa
+            LocalSend-1.18.2-ios-app.tar.gz
+          retention-days: 30

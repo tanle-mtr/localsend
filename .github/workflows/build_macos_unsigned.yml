@@ -1,0 +1,91 @@
+name: Build macOS (unsigned)
+
+# 手动触发：避免影响上游既有的 CI / release 流程。
+on:
+  workflow_dispatch:
+    inputs:
+      flutter_version:
+        description: 'Flutter version'
+        required: false
+        default: '3.47.9'
+
+jobs:
+  build-macos:
+    runs-on: macos-15
+    timeout-minutes: 180
+    env:
+      # Flutter 会把 FLUTTER_XCODE_* 环境变量原样注入 xcodebuild 的 build settings，
+      # 因此无需 Apple Developer 账号即可产出未签名的 .app / .dmg。
+      FLUTTER_XCODE_CODE_SIGNING_ALLOWED: 'NO'
+      FLUTTER_XCODE_CODE_SIGNING_REQUIRED: 'NO'
+      FLUTTER_XCODE_CODE_SIGN_IDENTITY: '-'
+      FLUTTER_XCODE_CODE_SIGN_STYLE: 'Manual'
+      COCOAPODS_DISABLE_STATS: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ inputs.flutter_version }}
+          cache: true
+
+      - name: Prepare Flutter desktop
+        run: |
+          flutter config --no-analytics
+          flutter config --enable-macos-desktop
+          flutter precache --macos
+          flutter --version
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.97.1'
+          targets: 'aarch64-apple-darwin,x86_64-apple-darwin'
+
+      # 上游工程写死了原作者的 DEVELOPMENT_TEAM；无签名构建必须清掉。
+      - name: Remove upstream signing team
+        run: |
+          sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/g' app/macos/Runner.xcodeproj/project.pbxproj
+          grep -c 'DEVELOPMENT_TEAM = ""' app/macos/Runner.xcodeproj/project.pbxproj || true
+
+      # vendored ffmpeg 插件的 macOS 入口会在构建时联网下载预编译库；桌面端不需要 ffmpeg。
+      - name: Drop unneeded ffmpeg macOS platform
+        run: |
+          python3 - <<'PY'
+          p = 'packages/ffmpeg_kit_flutter_new_min/pubspec.yaml'
+          s = open(p, encoding='utf-8').read()
+          s = s.replace('      macos:\n        pluginClass: FFmpegKitFlutterPlugin\n', '')
+          open(p, 'w', encoding='utf-8').write(s)
+          print('macOS platform entry removed')
+          PY
+
+      - name: Pub get
+        working-directory: app
+        run: flutter pub get
+
+      - name: Build macOS release
+        working-directory: app
+        run: flutter build macos --release
+
+      - name: Package DMG and archive
+        run: |
+          APP="app/build/macos/Build/Products/Release/LocalSend.app"
+          test -d "$APP" || { echo "LocalSend.app not found"; find app/build/macos -maxdepth 5 -name '*.app' -print; exit 1; }
+          hdiutil create -volname "LocalSend" -srcfolder "$APP" -ov -format UDZO \
+            "LocalSend-1.18.2-macos-universal.dmg"
+          tar czf "LocalSend-1.18.2-macos-app.tar.gz" -C "$(dirname "$APP")" "LocalSend.app"
+          ls -lh LocalSend-1.18.2-macos-*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: localsend-macos-unsigned
+          path: |
+            LocalSend-1.18.2-macos-universal.dmg
+            LocalSend-1.18.2-macos-app.tar.gz
+          retention-days: 30

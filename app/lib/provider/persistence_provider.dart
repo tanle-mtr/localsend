@@ -97,6 +97,11 @@ const _verifyChecksums = 'ls_verify_checksums';
 const _advancedSettingsKey = 'ls_advanced_settings';
 const _whatsNewKey = 'ls_whats_new';
 
+// 实验功能：蓝牙无网互传
+const _enableBluetooth = 'ls_enable_bluetooth';
+// 实验功能：跨品牌动态图自动转换（默认开启）
+const _autoConvertLivePhoto = 'ls_auto_convert_live_photo';
+
 final persistenceProvider = Provider<PersistenceService>((ref) {
   throw Exception('persistenceProvider not initialized');
 });
@@ -598,6 +603,22 @@ class PersistenceService {
 
   Future<void> setWhatsNew(String version) async {
     await _prefs.setString(_whatsNewKey, version);
+  }
+
+  bool getEnableBluetooth() {
+    return _prefs.getBool(_enableBluetooth) ?? false;
+  }
+
+  Future<void> setEnableBluetooth(bool enableBluetooth) async {
+    await _prefs.setBool(_enableBluetooth, enableBluetooth);
+  }
+
+  bool getAutoConvertLivePhoto() {
+    return _prefs.getBool(_autoConvertLivePhoto) ?? true;
+  }
+
+  Future<void> setAutoConvertLivePhoto(bool autoConvertLivePhoto) async {
+    await _prefs.setBool(_autoConvertLivePhoto, autoConvertLivePhoto);
   }
 
   Future<void> clear() async {

@@ -30,11 +30,16 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(t.dialogs.messageInput.title),
-      content: TextFormField(
-        controller: _textController,
-        keyboardType: TextInputType.multiline,
-        maxLines: null,
-        autofocus: true,
+      content: ConstrainedBox(
+        // The field grows with the text; cap it so long messages scroll
+        // instead of overflowing the dialog on mobile (#301).
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.4),
+        child: TextFormField(
+          controller: _textController,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          autofocus: true,
+        ),
       ),
       actions: [
         TextButton(

@@ -4,6 +4,7 @@ import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/send_mode.dart';
 import 'package:localsend_app/pages/device_details_page.dart';
+import 'package:localsend_app/pages/scan_qr_page.dart';
 import 'package:localsend_app/pages/selected_files_page.dart';
 import 'package:localsend_app/pages/tabs/send_tab_vm.dart';
 import 'package:localsend_app/pages/troubleshoot_page.dart';
@@ -185,6 +186,30 @@ class SendTab extends StatelessWidget {
                   child: CustomIconButton(
                     onPressed: () async => vm.onTapAddress(context),
                     child: const Icon(Icons.ads_click),
+                  ),
+                ),
+                Tooltip(
+                  message: t.qrConnect.scan,
+                  child: CustomIconButton(
+                    onPressed: () async {
+                      var files = ref.read(selectedSendingFilesProvider);
+                      if (files.isEmpty) {
+                        await AddFileDialog.open(context: context, options: pickerOptions);
+                      }
+                      files = ref.read(selectedSendingFilesProvider);
+                      if (files.isEmpty || !context.mounted) return;
+                      final device = await Navigator.of(context).push<Device?>(
+                        MaterialPageRoute(builder: (_) => const ScanQrPage()),
+                      );
+                      if (device != null && context.mounted) {
+                        await ref.notifier(sendProvider).startSession(
+                              target: device,
+                              files: files,
+                              background: false,
+                            );
+                      }
+                    },
+                    child: const Icon(Icons.qr_code_scanner),
                   ),
                 ),
                 Tooltip(

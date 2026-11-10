@@ -41,6 +41,13 @@ class SettingsState with SettingsStateMappable {
   final int discoveryTimeout;
   final bool advancedSettings;
 
+  /// 是否启用蓝牙无网互传（实验功能）。
+  /// 构造时给默认值，dart_mappable 会在反序列化缺字段（旧版本配置）时回退到该默认值。
+  final bool enableBluetooth;
+
+  /// 发送动态图（Live/Motion Photo）到不同品牌设备时，是否自动转换为目标品牌格式。
+  final bool autoConvertLivePhoto;
+
   const SettingsState({
     required this.showToken,
     required this.alias,
@@ -73,5 +80,7 @@ class SettingsState with SettingsStateMappable {
     required this.verifyChecksums,
     required this.discoveryTimeout,
     required this.advancedSettings,
+    this.enableBluetooth = false,
+    this.autoConvertLivePhoto = true,
   });
 }

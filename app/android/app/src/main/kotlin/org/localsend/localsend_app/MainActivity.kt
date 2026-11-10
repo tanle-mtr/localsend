@@ -6,6 +6,10 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothServerSocket
+import android.bluetooth.BluetoothSocket
 import android.database.Cursor
 import android.media.MediaScannerConnection
 import android.net.Uri
@@ -18,7 +22,9 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.EventChannel
 import java.io.File
+import java.util.UUID
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,10 +32,17 @@ import java.util.TimeZone
 
 
 private const val CHANNEL = "org.localsend.localsend_app/localsend"
+private const val BT_METHOD_CHANNEL = "localsend_bluetooth/methods"
+private const val BT_EVENT_CHANNEL = "localsend_bluetooth/events"
 private const val REQUEST_CODE_PICK_DIRECTORY = 1
 private const val REQUEST_CODE_PICK_DIRECTORY_PATH = 2
 private const val REQUEST_CODE_PICK_FILE = 3
 private const val REQUEST_CODE_LOCAL_NETWORK = 4
+private const val REQUEST_CODE_BLUETOOTH_CONNECT = 5
+
+// 经典蓝牙 SPP 标准 UUID（flutter_bluetooth_serial 的客户端 connect 也使用该 UUID，
+// 因此原生服务端用同一 UUID 监听，才能被对端连上）。
+private val SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
 // Not available as a constant in compileSdk 36.
 private const val PERMISSION_ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
@@ -39,6 +52,14 @@ class MainActivity : FlutterActivity() {
     private var pendingResult: MethodChannel.Result? = null
     private var pendingPermissionResult: MethodChannel.Result? = null
 
+    // 实验功能：蓝牙无网互传 —— 原生 RFCOMM 服务端状态。
+    // btServerRequested：Dart 侧的开关意图；btEventSink：Dart 已订阅事件流后才非 null。
+    // 仅当两者都满足时才真正打开服务端 socket，避免“socket 已开但无人消费字节”的竞态。
+    private var btServerRequested = false
+    private var btServerSocket: BluetoothServerSocket? = null
+    private var btAcceptThread: Thread? = null
+    private var btEventSink: EventChannel.EventSink? = null
+
     /// share_handler drops share intents arriving via onNewIntent while the Dart side
     /// is not subscribed to its media stream yet, which happens when this singleTask
     /// activity is relaunched into an existing task while the app is still starting.
@@ -47,12 +68,33 @@ class MainActivity : FlutterActivity() {
     private val pendingShareIntents = mutableListOf<Intent>()
     private var shareIntentReady = false
 
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        // A file shared from a file manager may also carry EXTRA_TEXT. Reading
+        // that file as a text message allocates the whole file in memory
+        // (up to 11 GB, #2862), so drop the text when a stream is present.
+        sanitizeShareIntent(intent)
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onNewIntent(intent: Intent) {
+        sanitizeShareIntent(intent)
         if (!shareIntentReady && (intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE)) {
             pendingShareIntents.add(intent)
             return
         }
         super.onNewIntent(intent)
+    }
+
+    private fun sanitizeShareIntent(intent: Intent?) {
+        if (intent == null) {
+            return
+        }
+        if ((intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE) &&
+            intent.hasExtra(Intent.EXTRA_STREAM)
+        ) {
+            intent.removeExtra(Intent.EXTRA_TEXT)
+            intent.removeExtra(Intent.EXTRA_HTML_TEXT)
+        }
     }
 
     private fun onShareIntentReady() {
@@ -143,6 +185,43 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        // 实验功能：蓝牙无网互传 —— 原生 RFCOMM 服务端 + 字节流回传。
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, BT_METHOD_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isSupported" -> result.success(BluetoothAdapter.getDefaultAdapter() != null)
+                    "startServer" -> {
+                        try {
+                            btServerRequested = true
+                            btTryOpenServer()
+                            result.success(null)
+                        } catch (e: Exception) {
+                            result.error("START_FAILED", e.message ?: "Failed to start Bluetooth server", null)
+                        }
+                    }
+                    "stopServer" -> {
+                        btServerRequested = false
+                        btStopServer()
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, BT_EVENT_CHANNEL)
+            .setStreamHandler(object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    btEventSink = events
+                    // Dart 已订阅：若开关已开，现在才真正打开服务端。
+                    btTryOpenServer()
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    btEventSink = null
+                    btStopServer()
+                }
+            })
     }
 
     /// Android 17+ gates local network access behind a runtime permission; older versions grant it implicitly.
@@ -345,6 +424,21 @@ class MainActivity : FlutterActivity() {
         startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
     }
 
+    /// Some third-party file managers / TV pickers return a URI without the
+    /// persistable grant flag. Taking it would throw SecurityException and the
+    /// picker would look like a permission error (#2549). The transient grant
+    /// attached to the result is enough to read the file right away.
+    private fun takePersistablePermission(uri: Uri, flags: Int) {
+        try {
+            val takeFlags = flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            if (takeFlags != 0) {
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+            }
+        } catch (e: SecurityException) {
+            // Ignore: read access for this transfer is still granted.
+        }
+    }
+
     @SuppressLint("WrongConstant")
     @Override
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -367,7 +461,7 @@ class MainActivity : FlutterActivity() {
                 val takeFlags: Int =
                     data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 if (uri != null) {
-                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    takePersistablePermission(uri, takeFlags)
 
                     val files = mutableListOf<FileInfo>()
                     listFiles(uri, files)
@@ -385,7 +479,7 @@ class MainActivity : FlutterActivity() {
                 val takeFlags: Int =
                     data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 if (uri != null) {
-                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    takePersistablePermission(uri, takeFlags)
                     pendingResult?.success(uri.toString())
                     pendingResult = null
                 } else {
@@ -417,7 +511,7 @@ class MainActivity : FlutterActivity() {
 
                 val resultList = mutableListOf<FileInfo>()
                 for (uri in uriList) {
-                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    takePersistablePermission(uri, takeFlags)
                     val documentFile = FastDocumentFile.fromDocumentUri(this, uri)
                     if (documentFile == null) {
                         pendingResult?.error("Error", "Failed to access file", null)
@@ -507,6 +601,86 @@ class MainActivity : FlutterActivity() {
         }
         return false
     }
+
+    // region 蓝牙无网互传：原生 RFCOMM 服务端
+
+    /**
+     * 在满足条件（用户开启开关 + Dart 已订阅事件流 + 蓝牙可用且已授权）时打开
+     * RFCOMM 服务端 socket，并在后台线程上接受连接、把字节流回传给 Dart。
+     */
+    private fun btTryOpenServer() {
+        if (!btServerRequested) return
+        if (btEventSink == null) return
+        if (btServerSocket != null) return
+
+        val adapter = BluetoothAdapter.getDefaultAdapter() ?: return
+        if (!adapter.isEnabled) {
+            throw IllegalStateException("蓝牙未开启")
+        }
+        if (!btHasConnectPermission()) {
+            throw SecurityException("缺少 BLUETOOTH_CONNECT 权限，请在系统设置中授予“附近的设备”权限")
+        }
+
+        // listenUsingRfcommWithServiceRecord 会触发 SDP 注册，使用标准 SPP UUID，
+        // 以便 flutter_bluetooth_serial 客户端（同一 UUID）能够连上。
+        btServerSocket = adapter.listenUsingRfcommWithServiceRecord("LocalSendBT", SPP_UUID)
+        btAcceptThread = Thread { btAcceptLoop() }.also { it.start() }
+    }
+
+    private fun btHasConnectPermission(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+        return checkSelfPermission("android.permission.BLUETOOTH_CONNECT") == PackageManager.PERMISSION_GRANTED
+    }
+
+    /** 接受循环：一次只处理一个连接，连接结束后若仍开启则继续等待下一个。 */
+    private fun btAcceptLoop() {
+        try {
+            while (btServerRequested && btServerSocket != null) {
+                val socket = btServerSocket?.accept() ?: break
+                try {
+                    btReadConnection(socket)
+                } catch (e: Exception) {
+                    // 单个连接的读取出错：关闭该连接后可继续接受下一个。
+                    btEventSink?.error("READ_FAILED", e.message ?: "Bluetooth read failed", null)
+                } finally {
+                    try { socket.close() } catch (ignored: Exception) {}
+                }
+            }
+        } catch (e: Exception) {
+            // accept() 被 btStopServer() 关闭 socket 时抛出异常，属于正常退出。
+            if (btServerRequested) {
+                btEventSink?.error("ACCEPT_FAILED", e.message ?: "Bluetooth accept failed", null)
+            }
+        }
+    }
+
+    /** 读取单个已连接 socket 的字节流，按块回传给 Dart（EventChannel）。 */
+    private fun btReadConnection(socket: BluetoothSocket) {
+        val input = socket.inputStream
+        val buf = ByteArray(16384)
+        var n: Int
+        while (btServerRequested && socket.isConnected) {
+            try {
+                n = input.read(buf)
+            } catch (e: Exception) {
+                break
+            }
+            if (n <= 0) break
+            val chunk = buf.copyOf(n)
+            btEventSink?.success(chunk) ?: break // 无人消费则停止读取，避免空转。
+        }
+    }
+
+    /** 关闭服务端 socket 与后台线程。 */
+    private fun btStopServer() {
+        btServerRequested = false
+        btAcceptThread?.interrupt()
+        btAcceptThread = null
+        try { btServerSocket?.close() } catch (ignored: Exception) {}
+        btServerSocket = null
+    }
+
+    // endregion
 
     private fun openGallery() {
         val intent = Intent()

@@ -10,6 +10,8 @@ class ErrorDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      // Long error messages (stack traces, socket errors) must not be clipped (#569).
+      scrollable: true,
       title: Text(t.dialogs.errorDialog.title),
       content: SelectableText(error),
       actions: [

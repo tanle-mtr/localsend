@@ -109,6 +109,19 @@ class CrossFileConverters {
 
 extension CompareFile on CrossFile {
   bool isSameFile({required CrossFile otherFile}) {
-    return (path ?? '') == (otherFile.path ?? '');
+    final path = this.path;
+    final otherPath = otherFile.path;
+    if (path != null || otherPath != null) {
+      return path == otherPath;
+    }
+
+    // In-memory files (text messages, clipboard content) have no path.
+    // Comparing only the path made every such file look identical.
+    final bytes = this.bytes;
+    final otherBytes = otherFile.bytes;
+    if (bytes != null && otherBytes != null && identical(bytes, otherBytes)) {
+      return true;
+    }
+    return name == otherFile.name && size == otherFile.size;
   }
 }

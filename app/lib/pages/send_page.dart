@@ -86,6 +86,16 @@ class _SendPageState extends State<SendPage> with Refena {
           // ignore: discarded_futures
           TaskbarHelper.visualizeStatus(nextStatus);
         }
+
+        // The session can disappear without this page closing, e.g. when the
+        // receiver cancels. Do not leave the user on a blank page (#128).
+        if (prev[widget.sessionId] != null && next[widget.sessionId] == null && _myDevice == null && _targetDevice == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+          });
+        }
       },
     );
     if (sendState == null && _myDevice == null && _targetDevice == null) {

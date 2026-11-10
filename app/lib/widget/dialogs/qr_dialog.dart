@@ -39,13 +39,18 @@ class QrDialog extends StatelessWidget {
             child: SizedBox(
               width: 200,
               height: 200,
-              child: PrettyQrView.data(
-                errorCorrectLevel: QrErrorCorrectLevel.Q,
-                data: data,
-                decoration: PrettyQrDecoration(
-                  shape: PrettyQrSmoothSymbol(
-                    roundFactor: 0,
-                    color: Theme.of(context).colorScheme.onSurface,
+              // QR codes must stay black-on-white for reliable scanning in dark mode (#3653).
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(8),
+                child: PrettyQrView.data(
+                  errorCorrectLevel: QrErrorCorrectLevel.Q,
+                  data: data,
+                  decoration: const PrettyQrDecoration(
+                    shape: PrettyQrSmoothSymbol(
+                      roundFactor: 0,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),

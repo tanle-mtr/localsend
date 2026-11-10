@@ -134,7 +134,8 @@ class AddFilesAction<T> extends AsyncReduxAction<SelectedSendingFilesNotifier, L
       //  https://github.com/fluttercandies/flutter_photo_manager/issues/589
 
       final crossFile = await converter(file);
-      final isAlreadySelect = state.any((element) => element.isSameFile(otherFile: crossFile));
+      final isAlreadySelect = state.any((element) => element.isSameFile(otherFile: crossFile)) ||
+          newFiles.any((element) => element.isSameFile(otherFile: crossFile));
       if (!isAlreadySelect) {
         newFiles.add(crossFile);
       }
@@ -189,7 +190,8 @@ class AddDirectoryAction extends AsyncReduxAction<SelectedSendingFilesNotifier, 
           lastAccessed: metadata?.accessed,
         );
 
-        final isAlreadySelect = state.any((element) => element.isSameFile(otherFile: file));
+        final isAlreadySelect = state.any((element) => element.isSameFile(otherFile: file)) ||
+            newFiles.any((element) => element.isSameFile(otherFile: file));
         if (!isAlreadySelect) {
           newFiles.add(file);
         }
@@ -251,7 +253,8 @@ class AddAndroidDirectoryAction extends AsyncReduxAction<SelectedSendingFilesNot
         lastAccessed: null,
       );
 
-      final isAlreadySelect = state.any((element) => element.isSameFile(otherFile: crossFile));
+      final isAlreadySelect = state.any((element) => element.isSameFile(otherFile: crossFile)) ||
+          newFiles.any((element) => element.isSameFile(otherFile: crossFile));
       if (!isAlreadySelect) {
         newFiles.add(crossFile);
       }

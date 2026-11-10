@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:localsend_app/gen/assets.gen.dart';
@@ -33,7 +34,9 @@ Future<void> initTray() async {
         // Icon for Flatpak, which must exist in /app/share/icons/hicolor/*x*/apps.
         icon = 'org.localsend.localsend_app-tray';
       } else {
-        icon = Assets.img.logo32White.path;
+        // A white icon is invisible on a light panel and vice versa (#3312).
+        final isDark = ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark;
+        icon = (isDark ? Assets.img.logo32White : Assets.img.logo32Black).path;
       }
       _logger.info('Using "$icon" as path of system tray icon');
       await tm.trayManager.setIcon(icon);

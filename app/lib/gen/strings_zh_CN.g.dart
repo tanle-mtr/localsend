@@ -46,6 +46,8 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
   @override
   late final Translations$receiveTab$zh_CN receiveTab = Translations$receiveTab$zh_CN.internal(_root);
   @override
+  late final Translations$qrConnect$zh_CN qrConnect = Translations$qrConnect$zh_CN.internal(_root);
+  @override
   late final Translations$sendTab$zh_CN sendTab = Translations$sendTab$zh_CN.internal(_root);
   @override
   late final Translations$settingsTab$zh_CN settingsTab = Translations$settingsTab$zh_CN.internal(_root);
@@ -95,6 +97,10 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
   late final Translations$web$zh_CN web = Translations$web$zh_CN.internal(_root);
   @override
   late final Translations$assetPicker$zh_CN assetPicker = Translations$assetPicker$zh_CN.internal(_root);
+  @override
+  late final Translations$bluetoothTab$zh_CN bluetoothTab = Translations$bluetoothTab$zh_CN.internal(_root);
+  @override
+  late final Translations$livePhoto$zh_CN livePhoto = Translations$livePhoto$zh_CN.internal(_root);
 }
 
 // Path: general
@@ -199,6 +205,47 @@ class Translations$receiveTab$zh_CN extends Translations$receiveTab$en {
   String get link => '通过链接接收';
 }
 
+// Path: qrConnect
+class Translations$qrConnect$zh_CN extends Translations$qrConnect$en {
+  Translations$qrConnect$zh_CN.internal(TranslationsZhCn root) : this._root = root, super.internal(root);
+
+  final TranslationsZhCn _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get receive => '通过二维码接收';
+  @override
+  String get scan => '扫码连接';
+  @override
+  String get invalid => '这不是 LocalSend 的连接二维码';
+  @override
+  String get notFound => '无法连接对方设备，请确认两台设备处于同一 Wi‑Fi 或热点下。';
+  @override
+  String get needSameNetwork => '两台设备需处于同一 Wi‑Fi 或热点';
+  @override
+  String get scanHint => '将摄像头对准对方的二维码';
+  @override
+  String get torch => '手电筒';
+  @override
+  String get cameraError => '相机不可用，请在系统设置中授予相机权限。';
+  @override
+  String get needNetwork => '当前无网络连接，请先连接 Wi‑Fi 或开启热点。';
+  @override
+  String get openHotspot => '开启个人热点';
+  @override
+  String get hotspotHint => '如需完全离线互传，请开启个人热点并让对方连接该热点。';
+  @override
+  String get hotspotName => '你的热点名称（可选，便于对方加入）';
+  @override
+  String get openWifiSettings => '打开 Wi‑Fi 设置';
+  @override
+  String get joinHotspot => '加入热点后重试';
+  @override
+  String get hotspot => '热点';
+  @override
+  String get iosHotspotHint => 'iOS 无法自动打开热点设置，请在「设置 › 个人热点」中手动开启。';
+}
+
 // Path: sendTab
 class Translations$sendTab$zh_CN extends Translations$sendTab$en {
   Translations$sendTab$zh_CN.internal(TranslationsZhCn root) : this._root = root, super.internal(root);
@@ -255,6 +302,8 @@ class Translations$settingsTab$zh_CN extends Translations$settingsTab$en {
   late final Translations$settingsTab$other$zh_CN other = Translations$settingsTab$other$zh_CN.internal(_root);
   @override
   String get advancedSettings => '高级设置';
+  @override
+  String get experiments => '实验功能';
 }
 
 // Path: troubleshootPage
@@ -278,6 +327,8 @@ class Translations$troubleshootPage$zh_CN extends Translations$troubleshootPage$
   late final Translations$troubleshootPage$noDiscovery$zh_CN noDiscovery = Translations$troubleshootPage$noDiscovery$zh_CN.internal(_root);
   @override
   late final Translations$troubleshootPage$noConnection$zh_CN noConnection = Translations$troubleshootPage$noConnection$zh_CN.internal(_root);
+  @override
+  late final Translations$troubleshootPage$diagnostics$zh_CN diagnostics = Translations$troubleshootPage$diagnostics$zh_CN.internal(_root);
 }
 
 // Path: networkInterfacesPage
@@ -344,6 +395,8 @@ class Translations$selectedFilesPage$zh_CN extends Translations$selectedFilesPag
   // Translations
   @override
   String get deleteAll => '全部删除';
+  @override
+  String get noFiles => '未选择文件';
 }
 
 // Path: deviceDetailsPage
@@ -840,6 +893,68 @@ class Translations$assetPicker$zh_CN extends Translations$assetPicker$en {
   String get sUnitAssetCountLabel => '计数';
 }
 
+// Path: bluetoothTab
+class Translations$bluetoothTab$zh_CN extends Translations$bluetoothTab$en {
+  Translations$bluetoothTab$zh_CN.internal(TranslationsZhCn root) : this._root = root, super.internal(root);
+
+  final TranslationsZhCn _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get title => '蓝牙';
+  @override
+  String get unsupported => '当前平台（iOS）不支持蓝牙文件传输。';
+  @override
+  String get enablePrompt => '开启蓝牙以开始';
+  @override
+  String get discover => '扫描设备';
+  @override
+  String get stopDiscover => '停止扫描';
+  @override
+  String get noDevices => '未找到设备';
+  @override
+  String get receiveMode => '接收模式';
+  @override
+  String get receiveHint => '开启接收模式后，从另一台设备通过蓝牙发送（无需网络）。';
+  @override
+  String get sending => '发送中…';
+  @override
+  String get received => '已接收文件';
+  @override
+  String get sendTo => '发送到';
+  @override
+  String get pairHint => '请先在系统蓝牙设置中与该设备配对。';
+  @override
+  String get notPaired => '未配对';
+  @override
+  String get turnOn => '开启';
+  @override
+  String get bluetoothOff => '蓝牙已关闭';
+  @override
+  String deviceCount({required Object count}) => '找到 ${count} 台设备';
+  @override
+  String get receiving => '接收中…';
+}
+
+// Path: livePhoto
+class Translations$livePhoto$zh_CN extends Translations$livePhoto$en {
+  Translations$livePhoto$zh_CN.internal(TranslationsZhCn root) : this._root = root, super.internal(root);
+
+  final TranslationsZhCn _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get autoConvert => '跨品牌自动转换动态图';
+  @override
+  String get autoConvertHint => '当把实况/动态照片发送给不同品牌的手机时，自动转换为对方相册可识别的格式。';
+  @override
+  String get converting => '正在转换动态图…';
+  @override
+  String get notConvertedTitle => '动态照片未转换';
+  @override
+  String notConverted({required Object count}) => '${count} 张动态照片无法转换，将作为静态图片发送。';
+}
+
 // Path: receiveTab.infoBox
 class Translations$receiveTab$infoBox$zh_CN extends Translations$receiveTab$infoBox$en {
   Translations$receiveTab$infoBox$zh_CN.internal(TranslationsZhCn root) : this._root = root, super.internal(root);
@@ -1106,6 +1221,35 @@ class Translations$troubleshootPage$noConnection$zh_CN extends Translations$trou
   String get symptom => '双方设备均无法发现对方或者分享文件。';
   @override
   String get solution => '当问题发生在双方设备上时，请先确认双方设备处于同一个 Wi‑Fi 网络上，且共享相同的网络配置（端口、多播地址、加密选项）。若因 Wi‑Fi 不允许参与者间通信，那么请在路由器中关闭“接入点(AP)隔离”选项。';
+}
+
+// Path: troubleshootPage.diagnostics
+class Translations$troubleshootPage$diagnostics$zh_CN extends Translations$troubleshootPage$diagnostics$en {
+  Translations$troubleshootPage$diagnostics$zh_CN.internal(TranslationsZhCn root) : this._root = root, super.internal(root);
+
+  final TranslationsZhCn _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get title => '网络诊断';
+  @override
+  String serverRunning({required Object port}) => '服务运行中，端口 ${port}';
+  @override
+  String get serverStopped => '服务未运行';
+  @override
+  String localIps({required Object ips}) => '本机 IP：${ips}';
+  @override
+  String discovered({required Object n}) => '已发现 ${n} 台设备';
+  @override
+  String get vpnWarning => '检测到 VPN/虚拟网卡地址，VPN 可能导致设备发现失败。';
+  @override
+  String get restartServer => '重启服务';
+  @override
+  String get restartDiscovery => '重启发现';
+  @override
+  String get copy => '复制诊断信息';
+  @override
+  String get copied => '诊断信息已复制';
 }
 
 // Path: receiveHistoryPage.entryActions

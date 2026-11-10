@@ -124,14 +124,55 @@ List<String> rankIpAddresses(List<String> nativeResult, String? thirdPartyResult
 
 /// Sorts Ip addresses with first being the most likely primary local address
 /// Currently,
-/// - sorts ending with ".1" last
-/// - primary is always first
+/// - prefers an explicitly detected primary address
+/// - prefers private LAN addresses over public ones (#270)
+/// - sorts the typical gateway address ending with ".1" last
 extension ListIpExt on List<String> {
   List<String> _rankIpAddresses(String? primary) {
-    return sorted((a, b) {
-      int scoreA = a == primary ? 10 : (a.endsWith('.1') ? 0 : 1);
-      int scoreB = b == primary ? 10 : (b.endsWith('.1') ? 0 : 1);
-      return scoreB.compareTo(scoreA);
-    });
+    return sorted((a, b) => _ipScore(b, primary).compareTo(_ipScore(a, primary)));
   }
+}
+
+int _ipScore(String ip, String? primary) {
+  if (ip == primary) {
+    return 100;
+  }
+  if (ip.endsWith('.1')) {
+    // Usually the router/gateway, not this device.
+    return 1;
+  }
+  if (_isPrivateIpv4(ip)) {
+    return 10;
+  }
+  if (ip.startsWith('169.254.')) {
+    // Link-local, usable only as a last resort.
+    return 2;
+  }
+  return 3;
+}
+
+bool _isPrivateIpv4(String ip) {
+  final parts = ip.split('.');
+  if (parts.length != 4) {
+    return false;
+  }
+  final a = int.tryParse(parts[0]);
+  final b = int.tryParse(parts[1]);
+  if (a == null || b == null) {
+    return false;
+  }
+  if (a == 10) {
+    return true;
+  }
+  if (a == 192 && b == 168) {
+    return true;
+  }
+  if (a == 172 && b >= 16 && b <= 31) {
+    return true;
+  }
+  // Carrier-grade NAT, still better than a public address for LAN transfers.
+  if (a == 100 && b >= 64 && b <= 127) {
+    return true;
+  }
+  return false;
 }

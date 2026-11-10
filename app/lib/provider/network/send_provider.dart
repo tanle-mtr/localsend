@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/cross_file.dart';
+import 'package:localsend_app/model/live_photo/photo_brand.dart';
 import 'package:localsend_app/model/send_mode.dart';
 import 'package:localsend_app/model/state/send/send_session_state.dart';
 import 'package:localsend_app/model/state/send/sending_file.dart';
@@ -12,6 +14,7 @@ import 'package:localsend_app/pages/send_page.dart';
 import 'package:localsend_app/provider/device_info_provider.dart';
 import 'package:localsend_app/provider/file_transfer_provider.dart';
 import 'package:localsend_app/provider/http_provider.dart';
+import 'package:localsend_app/provider/live_photo_provider.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/widget/dialogs/pin_dialog.dart';
@@ -37,6 +40,23 @@ import 'package:uuid/uuid.dart';
 
 const _uuid = Uuid();
 final _logger = Logger('Send');
+
+/// All addresses of [target], best first.
+///
+/// Devices discovered via multicast may advertise both IPv6 and IPv4. On some
+/// networks (e.g. the Windows built-in hotspot) the preferred IPv6 address is
+/// not routable, so every address has to be tried before giving up (#3509).
+List<HttpChannel> _candidateChannels(Device target) {
+  final channels = target.channels.whereType<HttpChannel>().toList();
+  if (channels.isNotEmpty) {
+    return channels;
+  }
+  final ip = target.ip;
+  if (ip == null) {
+    return const [];
+  }
+  return [HttpChannel(host: ip, port: target.port, https: target.https)];
+}
 
 /// This provider manages sending files to other devices.
 ///
@@ -96,9 +116,30 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     final sessionId = _uuid.v4();
     final createChecksums = ref.read(settingsProvider).createChecksums;
 
+    // 跨品牌动态图自动适配：在发起会话前，把本机动型照片转换为目标设备品牌能识别的格式。
+    final targetBrand = brandFromDeviceModel(target.deviceModel);
+    final effectiveFiles = await ref.notifier(livePhotoProvider).convertForTarget(files, targetBrand);
+    final unconvertedLivePhotos = ref.read(livePhotoProvider).unconvertedCount;
+    if (!background && unconvertedLivePhotos > 0) {
+      // At least warn the user instead of silently dropping the motion part (#2703).
+      await showDialog<void>(
+        context: Routerino.context, // ignore: use_build_context_synchronously
+        builder: (context) => AlertDialog(
+          title: Text(t.livePhoto.notConvertedTitle),
+          content: Text(t.livePhoto.notConverted(count: unconvertedLivePhotos)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(t.general.close),
+            ),
+          ],
+        ),
+      );
+    }
+
     // The ids are assigned upfront, so the checksums calculated below
     // can be mapped back to the corresponding file.
-    final selectedFiles = files.map((file) => (id: _uuid.v4(), file: file)).toList();
+    final selectedFiles = effectiveFiles.map((file) => (id: _uuid.v4(), file: file)).toList();
 
     state = state.updateSession(
       sessionId: sessionId,
@@ -118,8 +159,8 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
                 fileType: file.fileType,
                 hash: null,
                 // calculated below
-                preview: files.length == 1 && files.first.fileType == FileType.text && files.first.bytes != null
-                    ? utf8.decode(files.first.bytes!) // send simple message by embedding it into the preview
+                preview: effectiveFiles.length == 1 && effectiveFiles.first.fileType == FileType.text && effectiveFiles.first.bytes != null
+                    ? utf8.decode(effectiveFiles.first.bytes!) // send simple message by embedding it into the preview
                     : null,
                 metadata: file.lastModified != null || file.lastAccessed != null
                     ? FileMetadata(
@@ -258,17 +299,48 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
       do {
         invalidPin = false;
         try {
-          response = await client.prepareUpload(
-            protocol: target.getProtocolType(),
-            ip: target.ip!,
-            port: target.port,
-            payload: requestDto,
-            // The peer is already verified during the TLS handshake by the
-            // fingerprint the client is pinned to.
-            publicKey: null,
-            pin: pin,
-            cancelToken: prepareUploadCancelToken,
-          );
+          final channels = _candidateChannels(target);
+          Object? lastChannelError;
+          response = null;
+          for (final channel in channels) {
+            try {
+              response = await client.prepareUpload(
+                protocol: channel.https ? rust_model.ProtocolType.https : rust_model.ProtocolType.http,
+                ip: channel.host,
+                port: channel.port,
+                payload: requestDto,
+                // The peer is already verified during the TLS handshake by the
+                // fingerprint the client is pinned to.
+                publicKey: null,
+                pin: pin,
+                cancelToken: prepareUploadCancelToken,
+              );
+
+              // Remember the address that actually worked. The file upload
+              // must use the same channel, otherwise it would hit the dead
+              // address again (#3509).
+              if (channel.host != target.ip || channel.port != target.port || channel.https != target.https) {
+                state = state.updateSession(
+                  sessionId: sessionId,
+                  state: (s) => s == null
+                      ? null
+                      : s.copyWith(
+                          target: s.target.copyWith(ip: channel.host, port: channel.port, https: channel.https),
+                        ),
+                );
+              }
+              break;
+            } on rust_http.RsHttpClientError_StatusCode {
+              // The receiver answered, so other addresses of the same device
+              // would answer the same way (e.g. PIN required).
+              rethrow;
+            } catch (e) {
+              lastChannelError = e;
+            }
+          }
+          if (response == null) {
+            throw lastChannelError ?? StateError('No reachable address for ${target.alias}');
+          }
         } on rust_http.RsHttpClientError_StatusCode catch (e) {
           switch (e.status) {
             case 401:
@@ -787,6 +859,18 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     if (sessionState.status == SessionStatus.finished && ref.read(settingsProvider).sendMode == SendMode.single) {
       // clear selected files
       ref.redux(selectedSendingFilesProvider).dispatch(ClearSelectionAction());
+    }
+  }
+
+  /// Closes all sessions that already ended.
+  /// A stale "Finished" page must not block a new share intent (#3197).
+  void closeFinishedSessions() {
+    final finishedIds = state.entries
+        .where((entry) => entry.value.status != SessionStatus.waiting && entry.value.status != SessionStatus.sending)
+        .map((entry) => entry.key)
+        .toList();
+    for (final sessionId in finishedIds) {
+      closeSession(sessionId);
     }
   }
 

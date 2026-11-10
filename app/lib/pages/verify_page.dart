@@ -100,15 +100,20 @@ class VerifyWidget extends StatelessWidget {
           VerifyMode.icons => Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 240),
-              child: GridView.count(
-                crossAxisCount: 4,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  for (final icon in fingerprint.icons) Icon(icon, size: 32),
-                ],
+              // The icon order encodes the fingerprint, so it must stay LTR
+              // even when the app language is RTL (#3614).
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: GridView.count(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    for (final icon in fingerprint.icons) Icon(icon, size: 32),
+                  ],
+                ),
               ),
             ),
           ),

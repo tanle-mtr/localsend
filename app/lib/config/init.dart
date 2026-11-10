@@ -15,6 +15,7 @@ import 'package:localsend_app/provider/animation_provider.dart';
 import 'package:localsend_app/provider/app_arguments_provider.dart';
 import 'package:localsend_app/provider/device_info_provider.dart';
 import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
+import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
 import 'package:localsend_app/provider/network/webrtc/signaling_provider.dart';
 import 'package:localsend_app/provider/persistence_provider.dart';
@@ -43,6 +44,7 @@ import 'package:localsend_app/widget/dialogs/local_network_dialog.dart';
 import 'package:localsend_isolates/isolate.dart';
 import 'package:localsend_isolates/model/dto/file_dto.dart';
 import 'package:localsend_isolates/model/dto/multicast_dto.dart';
+import 'package:localsend_isolates/model/session_status.dart';
 import 'package:localsend_isolates/rust/api/logging.dart' as rust_logging;
 import 'package:localsend_isolates/util/logger.dart';
 import 'package:localsend_isolates/util/rust_init.dart';
@@ -329,6 +331,20 @@ Future<void> postInit(BuildContext context, Ref ref, bool appStart) async {
   // [FOSS_REMOVE_END]
 }
 
+/// A new share / open-with intent must supersede an already finished send
+/// screen, otherwise the user stays on the old "Finished" page (#3197).
+void _dismissFinishedSendScreens(Ref ref) {
+  final sessions = ref.read(sendProvider);
+  final hasFinished = sessions.values.any(
+    (session) => session.status != SessionStatus.waiting && session.status != SessionStatus.sending,
+  );
+  if (!hasFinished) {
+    return;
+  }
+  ref.notifier(sendProvider).closeFinishedSessions();
+  Routerino.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+}
+
 class _HandleShareIntentAction extends AsyncGlobalAction {
   final SharedMedia payload;
 
@@ -338,6 +354,7 @@ class _HandleShareIntentAction extends AsyncGlobalAction {
 
   @override
   Future<void> reduce() async {
+    _dismissFinishedSendScreens(ref);
     final message = payload.content;
     if (message != null && message.trim().isNotEmpty) {
       ref.redux(selectedSendingFilesProvider).dispatch(AddMessageAction(message: message));
@@ -364,6 +381,7 @@ class _HandleAppStartArgumentsAction extends AsyncGlobalAction {
 
   @override
   Future<void> reduce() async {
+    _dismissFinishedSendScreens(ref);
     final filesAdded = await ref.redux(selectedSendingFilesProvider).dispatchAsyncTakeResult(LoadSelectionFromArgsAction(args));
     if (filesAdded) {
       ref.redux(homePageControllerProvider).dispatch(ChangeTabAction(HomeTab.send));

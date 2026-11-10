@@ -48,6 +48,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
   late final Translations$general$en general = Translations$general$en.internal(_root);
   late final Translations$receiveTab$en receiveTab = Translations$receiveTab$en.internal(_root);
+  late final Translations$qrConnect$en qrConnect = Translations$qrConnect$en.internal(_root);
   late final Translations$sendTab$en sendTab = Translations$sendTab$en.internal(_root);
   late final Translations$settingsTab$en settingsTab = Translations$settingsTab$en.internal(_root);
   late final Translations$troubleshootPage$en troubleshootPage = Translations$troubleshootPage$en.internal(_root);
@@ -73,6 +74,8 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   late final Translations$tray$en tray = Translations$tray$en.internal(_root);
   late final Translations$web$en web = Translations$web$en.internal(_root);
   late final Translations$assetPicker$en assetPicker = Translations$assetPicker$en.internal(_root);
+  late final Translations$bluetoothTab$en bluetoothTab = Translations$bluetoothTab$en.internal(_root);
+  late final Translations$livePhoto$en livePhoto = Translations$livePhoto$en.internal(_root);
 }
 
 // Path: general
@@ -216,6 +219,63 @@ class Translations$receiveTab$en {
   String get link => 'Receive via link';
 }
 
+// Path: qrConnect
+class Translations$qrConnect$en {
+  Translations$qrConnect$en.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Receive via QR'
+  String get receive => 'Receive via QR';
+
+  /// en: 'Scan QR to connect'
+  String get scan => 'Scan QR to connect';
+
+  /// en: 'This is not a LocalSend connection QR code'
+  String get invalid => 'This is not a LocalSend connection QR code';
+
+  /// en: 'Could not reach the device. Make sure both phones are on the same Wi-Fi or hotspot.'
+  String get notFound => 'Could not reach the device. Make sure both phones are on the same Wi-Fi or hotspot.';
+
+  /// en: 'Both devices must be on the same Wi-Fi or hotspot'
+  String get needSameNetwork => 'Both devices must be on the same Wi-Fi or hotspot';
+
+  /// en: 'Point the camera at the other device's QR code'
+  String get scanHint => 'Point the camera at the other device\'s QR code';
+
+  /// en: 'Torch'
+  String get torch => 'Torch';
+
+  /// en: 'Camera unavailable. Please grant camera permission in system settings.'
+  String get cameraError => 'Camera unavailable. Please grant camera permission in system settings.';
+
+  /// en: 'No network connection. Connect to Wi-Fi or enable a hotspot first.'
+  String get needNetwork => 'No network connection. Connect to Wi-Fi or enable a hotspot first.';
+
+  /// en: 'Enable personal hotspot'
+  String get openHotspot => 'Enable personal hotspot';
+
+  /// en: 'For a network-less transfer, turn on your personal hotspot and have the other device join it.'
+  String get hotspotHint => 'For a network-less transfer, turn on your personal hotspot and have the other device join it.';
+
+  /// en: 'Your hotspot name (optional, helps the other side join)'
+  String get hotspotName => 'Your hotspot name (optional, helps the other side join)';
+
+  /// en: 'Open Wi-Fi settings'
+  String get openWifiSettings => 'Open Wi-Fi settings';
+
+  /// en: 'Retry after joining hotspot'
+  String get joinHotspot => 'Retry after joining hotspot';
+
+  /// en: 'Hotspot'
+  String get hotspot => 'Hotspot';
+
+  /// en: 'iOS cannot open hotspot settings automatically. Please enable it in Settings › Personal Hotspot.'
+  String get iosHotspotHint => 'iOS cannot open hotspot settings automatically. Please enable it in Settings › Personal Hotspot.';
+}
+
 // Path: sendTab
 class Translations$sendTab$en {
   Translations$sendTab$en.internal(this._root);
@@ -279,6 +339,9 @@ class Translations$settingsTab$en {
 
   /// en: 'Advanced settings'
   String get advancedSettings => 'Advanced settings';
+
+  /// en: 'Experiments'
+  String get experiments => 'Experiments';
 }
 
 // Path: troubleshootPage
@@ -301,6 +364,7 @@ class Translations$troubleshootPage$en {
   /// en: 'Fix automatically'
   String get fixButton => 'Fix automatically';
 
+  late final Translations$troubleshootPage$diagnostics$en diagnostics = Translations$troubleshootPage$diagnostics$en.internal(_root);
   late final Translations$troubleshootPage$firewall$en firewall = Translations$troubleshootPage$firewall$en.internal(_root);
   late final Translations$troubleshootPage$noDiscovery$en noDiscovery = Translations$troubleshootPage$noDiscovery$en.internal(_root);
   late final Translations$troubleshootPage$noConnection$en noConnection = Translations$troubleshootPage$noConnection$en.internal(_root);
@@ -385,6 +449,9 @@ class Translations$selectedFilesPage$en {
 
   /// en: 'Delete all'
   String get deleteAll => 'Delete all';
+
+  /// en: 'No files selected'
+  String get noFiles => 'No files selected';
 }
 
 // Path: deviceDetailsPage
@@ -947,6 +1014,91 @@ class Translations$assetPicker$en {
   String get sUnitAssetCountLabel => 'count';
 }
 
+// Path: bluetoothTab
+class Translations$bluetoothTab$en {
+  Translations$bluetoothTab$en.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Bluetooth'
+  String get title => 'Bluetooth';
+
+  /// en: 'Bluetooth file transfer is not supported on this platform (iOS).'
+  String get unsupported => 'Bluetooth file transfer is not supported on this platform (iOS).';
+
+  /// en: 'Enable Bluetooth to start'
+  String get enablePrompt => 'Enable Bluetooth to start';
+
+  /// en: 'Scan for devices'
+  String get discover => 'Scan for devices';
+
+  /// en: 'Stop scanning'
+  String get stopDiscover => 'Stop scanning';
+
+  /// en: 'No devices found'
+  String get noDevices => 'No devices found';
+
+  /// en: 'Receive mode'
+  String get receiveMode => 'Receive mode';
+
+  /// en: 'Turn on receive mode, then send from another device over Bluetooth (no network needed).'
+  String get receiveHint => 'Turn on receive mode, then send from another device over Bluetooth (no network needed).';
+
+  /// en: 'Sending...'
+  String get sending => 'Sending...';
+
+  /// en: 'Received files'
+  String get received => 'Received files';
+
+  /// en: 'Send to'
+  String get sendTo => 'Send to';
+
+  /// en: 'Pair the device in your system Bluetooth settings first.'
+  String get pairHint => 'Pair the device in your system Bluetooth settings first.';
+
+  /// en: 'Not paired'
+  String get notPaired => 'Not paired';
+
+  /// en: 'Turn on'
+  String get turnOn => 'Turn on';
+
+  /// en: 'Bluetooth is off'
+  String get bluetoothOff => 'Bluetooth is off';
+
+  /// en: '{count} device(s) found'
+  String deviceCount({required Object count}) => '${count} device(s) found';
+
+  /// en: 'Receiving…'
+  String get receiving => 'Receiving…';
+}
+
+// Path: livePhoto
+class Translations$livePhoto$en {
+  Translations$livePhoto$en.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Auto-convert Live Photos across brands'
+  String get autoConvert => 'Auto-convert Live Photos across brands';
+
+  /// en: 'When sending a Live/Motion Photo to a different phone brand, convert it to the format the receiver's gallery understands.'
+  String get autoConvertHint =>
+      'When sending a Live/Motion Photo to a different phone brand, convert it to the format the receiver\'s gallery understands.';
+
+  /// en: 'Converting Live Photos...'
+  String get converting => 'Converting Live Photos...';
+
+  /// en: 'Live Photo not converted'
+  String get notConvertedTitle => 'Live Photo not converted';
+
+  /// en: '{count} Live Photo(s) could not be converted and will be sent as still images.'
+  String notConverted({required Object count}) => '${count} Live Photo(s) could not be converted and will be sent as still images.';
+}
+
 // Path: receiveTab.infoBox
 class Translations$receiveTab$infoBox$en {
   Translations$receiveTab$infoBox$en.internal(this._root);
@@ -1241,6 +1393,45 @@ class Translations$settingsTab$other$en {
 
   /// en: 'Terms of Use'
   String get termsOfUse => 'Terms of Use';
+}
+
+// Path: troubleshootPage.diagnostics
+class Translations$troubleshootPage$diagnostics$en {
+  Translations$troubleshootPage$diagnostics$en.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Network diagnostics'
+  String get title => 'Network diagnostics';
+
+  /// en: 'Server running on port {port}'
+  String serverRunning({required Object port}) => 'Server running on port ${port}';
+
+  /// en: 'Server is not running'
+  String get serverStopped => 'Server is not running';
+
+  /// en: 'Local IPs: {ips}'
+  String localIps({required Object ips}) => 'Local IPs: ${ips}';
+
+  /// en: '{n} device(s) discovered'
+  String discovered({required Object n}) => '${n} device(s) discovered';
+
+  /// en: 'VPN/virtual network address detected. A VPN can block device discovery.'
+  String get vpnWarning => 'VPN/virtual network address detected. A VPN can block device discovery.';
+
+  /// en: 'Restart server'
+  String get restartServer => 'Restart server';
+
+  /// en: 'Restart discovery'
+  String get restartDiscovery => 'Restart discovery';
+
+  /// en: 'Copy diagnostics'
+  String get copy => 'Copy diagnostics';
+
+  /// en: 'Diagnostics copied'
+  String get copied => 'Diagnostics copied';
 }
 
 // Path: troubleshootPage.firewall

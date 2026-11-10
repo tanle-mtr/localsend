@@ -98,14 +98,65 @@ class ServerService extends Notifier<ServerState?> {
     return state!.copyWith(session: session.copyWith(files: {})).toString().replaceFirst('files: {}', 'files: <${session.files.length} files>');
   }
 
+  /// Updates the advertised alias without restarting the server (#2426).
+  void updateAlias(String alias) {
+    final current = state;
+    if (current == null) {
+      return;
+    }
+    state = current.copyWith(alias: alias);
+  }
+
   /// Starts the server from user settings.
+  ///
+  /// If the configured port cannot be bound (e.g. it is blocked by a firewall
+  /// or occupied by another process, #2746 / #2884), the next free port is
+  /// tried. The actual port is advertised via discovery, so peers still find
+  /// this device.
   Future<ServerState?> startServerFromSettings() async {
     final settings = ref.read(settingsProvider);
-    return startServer(
-      alias: settings.alias,
-      port: settings.port,
-      https: settings.https,
-    );
+    var port = settings.port;
+    if (port < 1 || port > 65535) {
+      port = defaultPort;
+    }
+
+    Object? lastError;
+    for (var attempt = 0; attempt < 10; attempt++) {
+      try {
+        final result = await startServer(
+          alias: settings.alias,
+          port: port,
+          https: settings.https,
+        );
+        if (result != null && port != settings.port) {
+          _logger.warning('Port ${settings.port} is unavailable. Server is using port $port instead.');
+        }
+        return result;
+      } catch (e) {
+        lastError = e;
+        final message = e.toString().toLowerCase();
+        final isPortError = message.contains('address already in use') ||
+            message.contains('10013') ||
+            message.contains('forbidden') ||
+            message.contains('permission denied') ||
+            message.contains('failed to create server socket') ||
+            message.contains('bind');
+        if (!isPortError) {
+          // TLS/certificate or other configuration errors will not be fixed by
+          // another port, so surface them immediately.
+          rethrow;
+        }
+        _logger.warning('Failed to bind port $port, trying the next port.', e);
+        port = port >= 65535 ? defaultPort : port + 1;
+        // Give the isolate a moment to release the failed listening socket.
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+      }
+    }
+
+    if (lastError != null) {
+      throw lastError;
+    }
+    return null;
   }
 
   /// Starts the server.
