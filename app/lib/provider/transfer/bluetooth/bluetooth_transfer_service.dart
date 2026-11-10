@@ -56,17 +56,14 @@ class BluetoothTransferService {
   /// 开始发现附近的蓝牙设备。iOS 返回空流。
   static Stream<BluetoothPeer> discover() {
     if (!Platform.isAndroid) return Stream<BluetoothPeer>.empty();
-    return FlutterBluetoothSerial.instance
-        .startDiscovery()
-        .map((result) {
-          final device = result.device;
-          return BluetoothPeer(
-            address: device.address,
-            name: device.name ?? device.address,
-            bonded: device.bondState == BluetoothBondState.bonded,
-          );
-        })
-        .distinct();
+    return FlutterBluetoothSerial.instance.startDiscovery().map((result) {
+      final device = result.device;
+      return BluetoothPeer(
+        address: device.address,
+        name: device.name ?? device.address,
+        bonded: device.bondState == BluetoothBondState.bonded,
+      );
+    }).distinct();
   }
 
   static Future<void> cancelDiscovery() async {

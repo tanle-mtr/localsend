@@ -25,10 +25,7 @@ class LivePhotoDetection {
     this.companionVideoPath,
   });
 
-  LivePhotoDetection.notLive(this.brand)
-      : isLivePhoto = false,
-        embedded = null,
-        companionVideoPath = null;
+  LivePhotoDetection.notLive(this.brand) : isLivePhoto = false, embedded = null, companionVideoPath = null;
 }
 
 /// 内嵌视频在文件中的区间信息。
@@ -72,7 +69,8 @@ Future<LivePhotoDetection> detectLivePhoto({
   }
 
   final text = latin1.decode(head, allowInvalid: true);
-  final isMotion = text.contains('MotionPhoto') ||
+  final isMotion =
+      text.contains('MotionPhoto') ||
       text.contains('MicroVideo') ||
       text.contains('Camera:MotionPhoto') ||
       text.contains('HwMavi') ||

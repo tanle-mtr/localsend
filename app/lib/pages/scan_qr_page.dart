@@ -59,7 +59,10 @@ class _ScanQrPageState extends State<ScanQrPage> with Refena {
     try {
       final https = parsed.https;
       final payload = ref.read(deviceFullInfoProvider).toRegisterDto();
-      final response = await ref.read(httpProvider).discovery.register(
+      final response = await ref
+          .read(httpProvider)
+          .discovery
+          .register(
             protocol: https ? ProtocolType.https : ProtocolType.http,
             ip: parsed.ip,
             port: parsed.port,
@@ -166,8 +169,8 @@ class _ScanQrPageState extends State<ScanQrPage> with Refena {
             child: Text(
               t.qrConnect.scanHint,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
           ),

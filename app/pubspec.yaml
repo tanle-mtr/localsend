@@ -98,14 +98,14 @@ dependency_overrides:
     git:
       url: https://github.com/Tienisto/device_apps.git
       ref: 5dc7956d938541254d2e175766b3b84ea38bb85b
+  ffmpeg_kit_flutter_new_min:
+    # Local fork drops the desktop platform entries: the upstream plugin downloads
+    # prebuilt FFmpeg bundles at build time, which breaks offline/proxied desktop
+    # builds. FFmpeg is only used for mobile live-photo conversion here.
+    path: ../packages/ffmpeg_kit_flutter_new_min
   flutter_bluetooth_serial:
     # Local fork adds the AGP 8 `namespace` and modern compileSdk.
     path: ../packages/flutter_bluetooth_serial
-  ffmpeg_kit_flutter_new_min:
-    # Local fork drops the Windows platform entry: the upstream plugin downloads a
-    # prebuilt FFmpeg bundle at CMake configure time, which breaks offline/proxied
-    # desktop builds. FFmpeg is only used for mobile live-photo conversion here.
-    path: ../packages/ffmpeg_kit_flutter_new_min
   pasteboard:
     # This is temporary workaround, wait upstream for update
     git:

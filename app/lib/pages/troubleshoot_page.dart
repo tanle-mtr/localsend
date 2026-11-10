@@ -248,7 +248,8 @@ class _DiagnosticsCard extends StatelessWidget {
     final ips = ref.watch(localIpProvider).localIps;
     final deviceCount = ref.watch(nearbyDevicesProvider.select((state) => state.devices.length));
     final hasVirtualIp = ips.any(_isVirtualIp);
-    final summary = 'LocalSend diagnostics\n'
+    final summary =
+        'LocalSend diagnostics\n'
         'server: ${server == null ? 'stopped' : 'running :${server.port}'}\n'
         'ips: ${ips.join(', ')}\n'
         'devices: $deviceCount\n'
@@ -264,9 +265,7 @@ class _DiagnosticsCard extends StatelessWidget {
             const SizedBox(height: 10),
             _DiagnosticRow(
               icon: Icons.dns,
-              text: server == null
-                  ? t.troubleshootPage.diagnostics.serverStopped
-                  : t.troubleshootPage.diagnostics.serverRunning(port: server.port),
+              text: server == null ? t.troubleshootPage.diagnostics.serverStopped : t.troubleshootPage.diagnostics.serverRunning(port: server.port),
               color: server == null ? Colors.orange : Colors.green,
             ),
             if (ips.isNotEmpty)

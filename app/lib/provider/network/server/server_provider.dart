@@ -135,7 +135,8 @@ class ServerService extends Notifier<ServerState?> {
       } catch (e) {
         lastError = e;
         final message = e.toString().toLowerCase();
-        final isPortError = message.contains('address already in use') ||
+        final isPortError =
+            message.contains('address already in use') ||
             message.contains('10013') ||
             message.contains('forbidden') ||
             message.contains('permission denied') ||

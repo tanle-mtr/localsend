@@ -77,10 +77,10 @@ class SettingsService extends PureNotifier<SettingsState> {
     receiveViaLinkAutoAccept: _persistence.getReceiveViaLinkAutoAccept(),
     createChecksums: _persistence.getCreateChecksums(),
     verifyChecksums: _persistence.getVerifyChecksums(),
-      discoveryTimeout: _persistence.getDiscoveryTimeout(),
-      advancedSettings: _persistence.getAdvancedSettingsEnabled(),
-      enableBluetooth: _persistence.getEnableBluetooth(),
-      autoConvertLivePhoto: _persistence.getAutoConvertLivePhoto(),
+    discoveryTimeout: _persistence.getDiscoveryTimeout(),
+    advancedSettings: _persistence.getAdvancedSettingsEnabled(),
+    enableBluetooth: _persistence.getEnableBluetooth(),
+    autoConvertLivePhoto: _persistence.getAutoConvertLivePhoto(),
   );
 
   Future<void> setAlias(String alias) async {

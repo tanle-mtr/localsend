@@ -202,7 +202,9 @@ class SendTab extends StatelessWidget {
                         MaterialPageRoute(builder: (_) => const ScanQrPage()),
                       );
                       if (device != null && context.mounted) {
-                        await ref.notifier(sendProvider).startSession(
+                        await ref
+                            .notifier(sendProvider)
+                            .startSession(
                               target: device,
                               files: files,
                               background: false,

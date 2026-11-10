@@ -23,25 +23,25 @@ enum PhotoBrand {
   /// 该品牌是否使用"单文件内嵌视频"的动态照片容器。
   /// iOS 使用"静帧 + 伴生视频"两文件方案，其余安卓厂商均为单文件内嵌。
   bool get isEmbeddedMotion => switch (this) {
-        PhotoBrand.ios => false,
-        PhotoBrand.unknown => false,
-        _ => true,
-      };
+    PhotoBrand.ios => false,
+    PhotoBrand.unknown => false,
+    _ => true,
+  };
 
   /// 是否为已知手机品牌（unknown 不算）。
   bool get isPhone => this != PhotoBrand.unknown;
 
   /// 该品牌动态照片对外展示的本地化名称（用于 UI 与日志）。
   String get displayName => switch (this) {
-        PhotoBrand.ios => 'iOS Live Photo',
-        PhotoBrand.samsung => 'Samsung Motion Photo',
-        PhotoBrand.google => 'Google Motion Photo',
-        PhotoBrand.xiaomi => 'Xiaomi Motion Photo',
-        PhotoBrand.oppo => 'OPPO / OnePlus Motion',
-        PhotoBrand.vivo => 'vivo Dynamic Photo',
-        PhotoBrand.huawei => 'Huawei Moving Picture',
-        PhotoBrand.unknown => 'Unknown',
-      };
+    PhotoBrand.ios => 'iOS Live Photo',
+    PhotoBrand.samsung => 'Samsung Motion Photo',
+    PhotoBrand.google => 'Google Motion Photo',
+    PhotoBrand.xiaomi => 'Xiaomi Motion Photo',
+    PhotoBrand.oppo => 'OPPO / OnePlus Motion',
+    PhotoBrand.vivo => 'vivo Dynamic Photo',
+    PhotoBrand.huawei => 'Huawei Moving Picture',
+    PhotoBrand.unknown => 'Unknown',
+  };
 }
 
 /// 根据 `device_info_plus` 提供的设备型号字符串推断品牌。
@@ -59,16 +59,11 @@ PhotoBrand brandFromDeviceModel(String? model) {
   if (m == null || m.isEmpty) return PhotoBrand.unknown;
   final lower = m.toLowerCase();
 
-  if (lower.startsWith('iphone') ||
-      lower.startsWith('ipad') ||
-      lower.startsWith('ipod') ||
-      lower.startsWith('mac')) {
+  if (lower.startsWith('iphone') || lower.startsWith('ipad') || lower.startsWith('ipod') || lower.startsWith('mac')) {
     return PhotoBrand.ios;
   }
 
-  if (lower.startsWith('sm-') ||
-      lower.startsWith('galaxy') ||
-      lower.contains('samsung')) {
+  if (lower.startsWith('sm-') || lower.startsWith('galaxy') || lower.contains('samsung')) {
     return PhotoBrand.samsung;
   }
 
@@ -83,10 +78,7 @@ PhotoBrand brandFromDeviceModel(String? model) {
     return PhotoBrand.google;
   }
 
-  if (lower.startsWith('xiaomi') ||
-      lower.startsWith('redmi') ||
-      lower.startsWith('poco') ||
-      lower.startsWith('mi ')) {
+  if (lower.startsWith('xiaomi') || lower.startsWith('redmi') || lower.startsWith('poco') || lower.startsWith('mi ')) {
     return PhotoBrand.xiaomi;
   }
 
@@ -124,9 +116,5 @@ PhotoBrand brandFromDeviceModel(String? model) {
 /// 真实品牌仍以 [brandFromDeviceModel] 的结果为准。
 bool fileNameLooksLikePhotoContainer(String name) {
   final lower = name.toLowerCase();
-  return lower.endsWith('.jpg') ||
-      lower.endsWith('.jpeg') ||
-      lower.endsWith('.heic') ||
-      lower.endsWith('.heif') ||
-      lower.endsWith('.png');
+  return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.heic') || lower.endsWith('.heif') || lower.endsWith('.png');
 }

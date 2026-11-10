@@ -97,7 +97,9 @@ class _BluetoothPageState extends State<BluetoothPage> with Refena {
             children: [
               Expanded(child: Text(t.bluetoothTab.sendTo, style: Theme.of(context).textTheme.titleMedium)),
               FilledButton.icon(
-                icon: vm.discovering ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.bluetooth_searching),
+                icon: vm.discovering
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.bluetooth_searching),
                 label: Text(vm.discovering ? t.bluetoothTab.stopDiscover : t.bluetoothTab.discover),
                 onPressed: vm.discovering
                     ? () => ref.notifier(bluetoothProvider).stopDiscovery()
@@ -117,7 +119,9 @@ class _BluetoothPageState extends State<BluetoothPage> with Refena {
               child: Text(t.bluetoothTab.deviceCount(count: vm.peers.length)),
             ),
           if (vm.peers.isEmpty && !vm.discovering)
-            Center(child: Padding(padding: const EdgeInsets.all(16), child: Text(t.bluetoothTab.noDevices)))
+            Center(
+              child: Padding(padding: const EdgeInsets.all(16), child: Text(t.bluetoothTab.noDevices)),
+            )
           else
             ...vm.peers.map(
               (peer) => ListTile(

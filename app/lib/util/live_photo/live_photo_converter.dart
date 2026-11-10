@@ -130,8 +130,14 @@ Future<bool> _remuxToMov(Uint8List videoBytes, String outPath) async {
 /// 根据 JPEG/HEIC 魔术字推断静帧扩展名。
 String _stillExtFromBytes(Uint8List bytes) {
   if (bytes.length > 12 &&
-      bytes[4] == 0x66 && bytes[5] == 0x74 && bytes[6] == 0x79 && bytes[7] == 0x70 && // 'ftyp'
-      bytes[8] == 0x68 && bytes[9] == 0x65 && bytes[10] == 0x69 && bytes[11] == 0x63) {
+      bytes[4] == 0x66 &&
+      bytes[5] == 0x74 &&
+      bytes[6] == 0x79 &&
+      bytes[7] == 0x70 && // 'ftyp'
+      bytes[8] == 0x68 &&
+      bytes[9] == 0x65 &&
+      bytes[10] == 0x69 &&
+      bytes[11] == 0x63) {
     return 'heic';
   }
   return 'jpg';

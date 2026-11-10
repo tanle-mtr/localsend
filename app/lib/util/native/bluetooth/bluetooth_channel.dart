@@ -29,6 +29,5 @@ class BluetoothNative {
   static Future<void> stopServer() => _methodChannel.invokeMethod('stopServer');
 
   /// 原生回传的 RFCOMM 原始字节流。
-  static Stream<Uint8List> receiveBytes() =>
-      _eventChannel.receiveBroadcastStream().where((e) => e is Uint8List).cast<Uint8List>();
+  static Stream<Uint8List> receiveBytes() => _eventChannel.receiveBroadcastStream().where((e) => e is Uint8List).cast<Uint8List>();
 }

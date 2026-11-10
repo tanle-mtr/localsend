@@ -145,12 +145,12 @@ class _HomePageState extends State<HomePage> with Refena {
                         PageView(
                           controller: vm.controller,
                           physics: const NeverScrollableScrollPhysics(),
-                        children: const [
-                          ReceiveTab(),
-                          SendTab(),
-                          SettingsTab(),
-                          BluetoothPage(),
-                        ],
+                          children: const [
+                            ReceiveTab(),
+                            SendTab(),
+                            SettingsTab(),
+                            BluetoothPage(),
+                          ],
                         ),
                         if (_dragAndDropIndicator)
                           Container(

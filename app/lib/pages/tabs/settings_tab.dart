@@ -296,14 +296,14 @@ class SettingsTab extends StatelessWidget {
                     },
                   ),
                   _BooleanEntry(
-                  label: t.settingsTab.send.createChecksums,
-                  value: vm.settings.createChecksums,
-                  onChanged: (b) async {
-                    await ref.notifier(settingsProvider).setCreateChecksums(b);
-                  },
-                ),
-              ],
-            ),
+                    label: t.settingsTab.send.createChecksums,
+                    value: vm.settings.createChecksums,
+                    onChanged: (b) async {
+                      await ref.notifier(settingsProvider).setCreateChecksums(b);
+                    },
+                  ),
+                ],
+              ),
             _SettingsSection(
               title: t.settingsTab.experiments,
               children: [
